@@ -2,8 +2,35 @@
 <html>
 <head>
     <title>Delete Attendance</title>
+    {% include "includes/theme_variables.html" %}
+    <style>
+        body {
+            background: var(--bg);
+            color: var(--text);
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+            margin: 2rem;
+        }
+        form {
+            max-width: 480px;
+            background: var(--card-bg);
+            padding: 1.25rem;
+            border-radius: 12px;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.08);
+        }
+        button, a {
+            margin-top: 1rem;
+            display: inline-block;
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+        }
+        a {
+            margin-left: 0.5rem;
+            color: var(--accent);
+        }
+    </style>
 </head>
 <body>
+    {% include "includes/theme_toggle_button.html" %}
     <h1>Confirm Delete</h1>
     <p>Are you sure you want to delete this attendance record?</p>
     <ul>

@@ -7,16 +7,17 @@
     {% load static %}
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest/dist/lucide.js"></script>
+    {% include "includes/theme_variables.html" %}
 
     <style>
         body {
             font-family: 'Inter', sans-serif;
-            background-color: #f0f2f5;
-            color: #334155;
+            background-color: var(--bg);
+            color: var(--text);
             line-height: 1.6;
-            
+
             /* Background Image Styles */
-            background-image: url("{% static 'css/lecture_background.jpg' %}");e: url('https://source.unsplash.com/random/1600x900/?university,campus'); /* Replace with your image path or a preferred Unsplash query */
+            background-image: url("{% static 'css/lecture_background.jpg' %}");
             background-size: cover;
             background-position: center;
             background-attachment: fixed; /* Makes the background image fixed while content scrolls */
@@ -182,7 +183,8 @@
         }
     </style>
 </head>
-<body class="bg-gray-50 text-gray-800 antialiased">
+<body class="text-gray-800 antialiased">
+    {% include "includes/theme_toggle_button.html" %}
 
     <div class="main-content-wrapper p-6 sm:p-8 md:p-10 lg:p-12">
         <div class="main-content-section" id="send-announcement-content">

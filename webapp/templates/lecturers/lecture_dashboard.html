@@ -9,13 +9,15 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="https://cdn.tailwindcss.com"></script>
+    {% include "includes/theme_variables.html" %}
     <style>
         /* Custom base styles - Inter font and antialiasing */
         body {
             font-family: 'Inter', sans-serif;
             -webkit-font-smoothing: antialiased;
             -moz-osx-font-smoothing: grayscale;
-            background-color: #f0f2f5;  
+            background-color: var(--bg);
+            color: var(--text);
         }
 
         /* Sidebar styles */
@@ -611,7 +613,8 @@
         }
     </style>
 </head>
-<body class="bg-gray-100">
+<body>
+    {% include "includes/theme_toggle_button.html" %}
 
 <div class="sidebar">
     <div class="top-section">
@@ -1028,6 +1031,8 @@
         navigateToSection('dashboard');
     });
 </script>
+
+{% include "includes/ai_chat.html" %}
 
 </body>
 </html>

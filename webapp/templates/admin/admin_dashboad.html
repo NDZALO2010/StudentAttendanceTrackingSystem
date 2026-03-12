@@ -5,20 +5,46 @@
     <meta charset="UTF-8">
     <title>Admin Dashboard</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    {% include "includes/theme_variables.html" %}
     <style>
+        :root {
+            --sidebar-bg: #34495e;
+            --sidebar-text: #ecf0f1;
+            --card-border: rgba(0,0,0,0.1);
+            --link-active: #e74c3c;
+            --btn-danger: #e74c3c;
+            --btn-success: #27ae60;
+            --btn-warning: #f39c12;
+            --shadow: rgba(0,0,0,0.1);
+        }
+        .dark-theme {
+            --sidebar-bg: #0f172a;
+            --sidebar-text: #f1f5f9;
+            --card-border: rgba(255,255,255,0.08);
+            --link-active: #fb7185;
+            --btn-danger: #f87171;
+            --btn-success: #34d399;
+            --btn-warning: #fbbf24;
+            --shadow: rgba(0,0,0,0.5);
+        }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text);
+        }
         .sidebar {
             width: 220px;
             min-height: 100vh;
-            background-color: #34495e;
-            color: white;
+            background-color: var(--sidebar-bg);
+            color: var(--sidebar-text);
             position: fixed;
             padding: 20px;
-            box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+            box-shadow: 2px 0 10px var(--shadow);
         }
         .user-info {
             text-align: center;
             padding: 20px 0;
-            border-bottom: 1px solid #455a64;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
             margin-bottom: 20px;
         }
         .user-name {
@@ -37,13 +63,13 @@
         .nav-link {
             display: block;
             padding: 12px 15px;
-            color: #ecf0f1;
+            color: var(--sidebar-text);
             text-decoration: none;
             border-radius: 5px;
             transition: all 0.3s ease;
         }
         .nav-link:hover, .nav-link.active {
-            background-color: #e74c3c;
+            background-color: var(--link-active);
             color: white;
         }
         .main-content {
@@ -55,7 +81,7 @@
             font-size: 24px;
             font-weight: bold;
             margin-bottom: 20px;
-            color: #34495e;
+            color: var(--text);
         }
         .dashboard-cards {
             display: grid;
@@ -64,10 +90,10 @@
             margin-top: 20px;
         }
         .card {
-            background: white;
+            background: var(--card-bg);
             border-radius: 8px;
             padding: 20px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 10px var(--shadow);
             transition: transform 0.3s ease;
         }
         .card:hover {
@@ -76,22 +102,22 @@
         .card-header {
             font-weight: bold;
             margin-bottom: 15px;
-            color: #e74c3c;
+            color: var(--link-active);
         }
         .card-content {
-            color: #7f8c8d;
+            color: var(--text);
         }
         .user-list {
             list-style: none;
             padding: 0;
         }
         .user-item {
-            background: #f9f9f9;
-            border-left: 4px solid #e74c3c;
+            background: var(--card-bg);
+            border-left: 4px solid var(--link-active);
             padding: 15px;
             margin-bottom: 10px;
             border-radius: 5px;
-            box-shadow: 0 1px 5px rgba(0,0,0,0.05);
+            box-shadow: 0 1px 5px var(--shadow);
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -101,11 +127,12 @@
         }
         .user-name {
             font-weight: bold;
-            color: #34495e;
+            color: var(--text);
             margin-bottom: 5px;
         }
         .user-id {
-            color: #7f8c8d;
+            color: var(--text);
+            opacity: 0.8;
             font-size: 14px;
         }
         .user-actions a, .user-actions button {
@@ -118,15 +145,15 @@
             font-size: 14px;
         }
         .edit-btn {
-            background-color: #f39c12;
+            background-color: var(--btn-warning);
             color: white;
         }
         .delete-btn {
-            background-color: #e74c3c;
+            background-color: var(--btn-danger);
             color: white;
         }
         .add-button {
-            background-color: #27ae60;
+            background-color: var(--btn-success);
             color: white;
             border: none;
             padding: 10px 15px;
@@ -137,7 +164,11 @@
             margin-bottom: 20px;
         }
         .add-button:hover {
-            background-color: #2ecc71;
+            filter: brightness(1.05);
+        }
+        .theme-toggle-btn {
+            margin-top: 1rem;
+            width: 100%;
         }
     </style>
 </head>
@@ -153,7 +184,8 @@
         <li class="nav-item"><a href="#" class="nav-link" data-section="manage-lecturers">Manage Lecturers</a></li>
         <li class="nav-item"><a href="#" class="nav-link" data-section="add-user">Add New User</a></li>
     </ul>
-    <form action="{% url 'logout' %}" method="post" style="margin-top: 30px;">
+    {% include "includes/theme_toggle_button.html" %}
+    <form action="{% url 'logout' %}" method="post" style="margin-top: 20px;">
         {% csrf_token %}
         <button type="submit" class="btn btn-danger w-100">Logout</button>
     </form>
@@ -343,7 +375,7 @@ function confirmDelete(userType, userId) {
         alert(`Deletion of ${userType} with ID: ${userId} initiated (implementation needed).`);
     }
 }
-</script>
+
 
 </body>
 </html>

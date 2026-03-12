@@ -575,6 +575,37 @@ def send_announcement(request):
     return render(request, 'lecturers/send_announcement.html', context)
 
 
+def ai_chat(request):
+    """Simple AI helper endpoint for UI chat widget.
+
+    This is a lightweight assistant and not intended to replace a full AI service.
+    """
+    # Accept JSON payload
+    try:
+        payload = json.loads(request.body.decode('utf-8') or '{}')
+        message = (payload.get('message') or '').strip()
+    except Exception:
+        return JsonResponse({'error': 'Invalid request payload.'}, status=400)
+
+    if not message:
+        return JsonResponse({'reply': 'Please type a question or message so I can assist you.'})
+
+    user_name = request.user.first_name if request.user.is_authenticated else ''
+    lower = message.lower()
+
+    if 'attendance' in lower:
+        reply = 'You can view and filter your attendance records from the Attendance section in your dashboard.'
+    elif 'login' in lower or 'sign in' in lower:
+        reply = 'Use your student/staff number and password to log in. If you forgot your password, use the "Forgot password" link on the login page.'
+    elif 'course' in lower or 'module' in lower or 'class' in lower:
+        reply = 'Your courses and timetable are accessible from the dashboard. Students see enrolled subjects; lecturers see the modules they teach.'
+    elif 'hello' in lower or 'hi' in lower:
+        reply = f"Hello {user_name}! How can I help you today?"
+    else:
+        reply = 'I am a helper bot for EduTrack. Ask me about attendance, logging in, or navigating the dashboard.'
+
+    return JsonResponse({'reply': reply})
+
 
 # --- Registration Views ---
 
@@ -977,7 +1008,7 @@ def edit_class_session(request, pk):
         form = ClassSessionForm(instance=class_session, lecturer_profile=lecturer_profile)
 
     # 
-    return render(request, 'academics/class_session_form.html', {'form': form, 'class_session': class_session})
+    return render(request, 'lecturers/class_session_form.html', {'form': form, 'class_session': class_session})
 
 
 @login_required

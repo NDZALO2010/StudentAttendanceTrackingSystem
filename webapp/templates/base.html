@@ -8,16 +8,17 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    {% include "includes/theme_variables.html" %}
     <style>
         body {
             font-family: 'Inter', sans-serif;
-            background-color: #f7fafc;
-            color: #2d3748;
+            background-color: var(--bg);
+            color: var(--text);
         }
         .header {
-            background-color: #ffffff;
+            background-color: var(--header-bg);
             padding: 2rem 0;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+            box-shadow: 0 2px 4px var(--shadow);
         }
         .header-container {
             display: flex;
@@ -30,7 +31,7 @@
             margin-right: 2rem;
         }
         .hero-section {
-            background-color: #e0f2fe;
+            background-color: var(--card-bg);
             padding: 10rem 0;
             text-align: center;
             border-radius: 0.75rem;
@@ -48,7 +49,7 @@
         .hero-title {
             font-size: 3.5rem;
             font-weight: 700;
-            color: #1a202c;
+            color: var(--text);
             margin-bottom: 2rem;
             line-height: 1.3;
             text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
@@ -56,7 +57,7 @@
         }
         .hero-content {
             font-size: 1.3rem;
-            color: #4a5568;
+            color: var(--muted);
             margin-bottom: 2.5rem;
             line-height: 1.8;
             max-width: 900px;
@@ -67,8 +68,8 @@
             z-index: 1;
         }
         .login-button {
-            background-color: #3182ce;
-            color: #fff;
+            background-color: var(--btn-bg);
+            color: var(--btn-text);
             padding: 0.75rem 2.5rem;
             font-size: 1.25rem;
             font-weight: 600;
@@ -76,30 +77,33 @@
             text-decoration: none;
             transition: all 0.2s ease;
             border: none;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.08);
+            box-shadow: 0 2px 5px var(--shadow);
             z-index: 1;
         }
         .login-button:hover {
-            background-color: #2a69ac;
+            background-color: var(--btn-bg-hover);
             transform: translateY(-2px);
-            box-shadow: 0 3px 7px rgba(0, 0, 0, 0.12);
+            box-shadow: 0 3px 7px var(--shadow);
         }
         .login-button:active {
-            background-color: #254e77;
+            background-color: var(--btn-bg-active);
             transform: translateY(0);
-            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
+            box-shadow: 0 1px 2px var(--shadow);
         }
+
+
         .features-section {
             padding: 7rem 0;
             text-align: center;
-            background-color: #f2f2f2;
+            background-color: var(--card-bg);
             border-radius: 0.75rem;
             margin-bottom: 3rem;
+            box-shadow: 0 4px 6px var(--shadow);
         }
         .features-title {
             font-size: 2.5rem;
             font-weight: 600;
-            color: #1a202c;
+            color: var(--text);
             margin-bottom: 2rem;
         }
         .feature-item {
@@ -114,33 +118,38 @@
         .feature-title {
             font-size: 1.75rem;
             font-weight: 600;
-            color: #2d3748;
+            color: var(--text);
             margin-bottom: 0.75rem;
         }
         .feature-description {
             font-size: 1.15rem;
-            color: #718096;
+            color: var(--muted);
             line-height: 1.8;
         }
         .footer {
             text-align: center;
             padding: 2.5rem 0;
-            background-color: #edf2f7;
-            color: #718096;
-            border-top: 1px solid #e2e8f0;
+            background-color: var(--footer-bg);
+            color: var(--muted);
+            border-top: 1px solid rgba(226, 232, 240, 1);
             border-radius: 0.75rem;
             margin-top: 4rem;
         }
 
         /* New Styles for Improved Design */
         .header {
-            background-color: #ffffff;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            background-color: var(--header-bg);
+            box-shadow: 0 4px 6px var(--shadow);
         }
         .header-container {
             max-width: 1200px;
             margin: 0 auto;
             padding: 0 1rem;
+        }
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
         }
         .logo {
             width: 180px;
@@ -152,11 +161,11 @@
         .hero-title {
             font-size: 3rem;
             margin-bottom: 1.5rem;
-            color: #2d3748;
+            color: var(--text);
         }
         .hero-content {
             font-size: 1.2rem;
-            color: #4a5568;
+            color: var(--muted);
             margin-bottom: 2rem;
             max-width: 800px;
         }
@@ -167,20 +176,20 @@
             transition: background-color 0.3s ease, transform 0.2s ease;
         }
         .login-button:hover {
-            background-color: #2569ac;
+            background-color: var(--btn-bg-hover);
             transform: translateY(-2px);
         }
         .features-section {
             padding: 6rem 0;
-            background-color: #ffffff;
+            background-color: var(--card-bg);
             border-radius: 0.5rem;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 4px 6px var(--shadow);
             margin-bottom: 3rem;
         }
         .features-title {
             font-size: 2.25rem;
             margin-bottom: 1.5rem;
-            color: #2d3748;
+            color: var(--text);
         }
         .feature-item {
             margin-bottom: 2rem;
@@ -194,19 +203,19 @@
         .feature-title {
             font-size: 1.5rem;
             font-weight: 600;
-            color: #2d3748;
+            color: var(--text);
             margin-bottom: 0.5rem;
         }
         .feature-description {
             font-size: 1rem;
-            color: #718096;
+            color: var(--muted);
             line-height: 1.7;
         }
         .footer {
             padding: 2rem 0;
-            background-color: #f7fafc;
-            color: #718096;
-            border-top: 1px solid #e2e8f0;
+            background-color: var(--footer-bg);
+            color: var(--muted);
+            border-top: 1px solid rgba(226, 232, 240, 1);
             border-radius: 0.5rem;
             margin-top: 2rem;
         }
@@ -253,14 +262,19 @@
             }
         }
     </style>
+    {% include 'includes/theme_variables.html' %}
 </head>
 <body>
+    {% include "includes/theme_toggle_button.html" %}
     <header class="header">
         <div class="container header-container">
-            <img src="your-logo.png" alt="EduTrack Logo" class="logo">
-            <h1 class="text-3xl font-semibold text-gray-800">
-                Attendance Management with EduTrack
-            </h1>
+            <div class="header-left">
+                <img src="your-logo.png" alt="EduTrack Logo" class="logo">
+                <h1 class="text-3xl font-semibold text-gray-800">
+                    Attendance Management with EduTrack
+                </h1>
+            </div>
+            <button id="theme-toggle" class="theme-toggle" aria-label="Toggle theme">🌙 Theme</button>
         </div>
     </header>
     <main class="container">

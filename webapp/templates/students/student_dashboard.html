@@ -21,16 +21,17 @@
     
     <!-- Tailwind CSS (for utility classes, though custom CSS is primary) -->
     <script src="https://cdn.tailwindcss.com"></script>
+    {% include "includes/theme_variables.html" %}
 
     <style>
         /* Custom base styles */
         body {
             font-family: 'Inter', sans-serif;
-            background-color: #f0f2f5; /* Lighter, more modern background gray */
+            background-color: var(--bg); /* Lighter, more modern background gray */
             -webkit-font-smoothing: antialiased;
             -moz-osx-font-smoothing: grayscale;
             line-height: 1.6;
-            color: #2c3e50; /* Darker, richer text color for better readability */
+            color: var(--text); /* Darker, richer text color for better readability */
         }
 /* Sidebar - Sleek Modern Look */
 .divider {
@@ -725,7 +726,8 @@
         }
     </style>
 </head>
-<body class="bg-gray-100">
+<body>
+    {% include "includes/theme_toggle_button.html" %}
     <div class="sidebar">
         <div class="user-info">
              <h2>Student Profile</h2>
@@ -1558,5 +1560,8 @@
         }
 
     </script>
+
+    {% include "includes/ai_chat.html" %}
+
 </body>
 </html>

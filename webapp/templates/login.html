@@ -7,6 +7,7 @@
     {% load static %}
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
+    {% include "includes/theme_variables.html" %}
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" xintegrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJkl9QevSCWr3W6A==" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <style>
         /* Base styles for Inter font and antialiasing */
@@ -21,7 +22,8 @@
             font-family: 'Inter', sans-serif;
             -webkit-font-smoothing: antialiased;
             -moz-osx-font-smoothing: grayscale;
-            background-color: #e2e8f0; /* Softer light gray background for the whole page */
+            background-color: var(--bg);
+            color: var(--text);
             display: flex; /* Use flex to center the container */
             align-items: center; /* Center vertically */
             justify-content: center; /* Center horizontally */
@@ -45,9 +47,9 @@
             max-width: 1200px; /* Max width for larger screens */
             height: 90%; /* Adjust overall height */
             min-height: 600px; /* Define a minimum height for the entire login card */
-            background-color: #ffffff; /* Default background for the card */
+            background-color: var(--card-bg); /* Default background for the card */
             border-radius: 1.5rem; /* More pronounced border-radius */
-            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.15); /* Stronger, more diffused shadow */
+            box-shadow: 0 20px 50px var(--shadow); /* Stronger, more diffused shadow */
             overflow: hidden; /* Crucial to clip children's corners */
             animation: fadeIn 0.8s ease-out; /* Add a subtle fade-in animation for the card */
         }
@@ -72,7 +74,7 @@
             align-items: center;
             justify-content: center;
             padding: 3.5rem 3rem; /* Generous padding for content inside */
-            background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%); /* Subtle gradient for depth */
+            background: var(--panel-bg); /* Subtle gradient for depth */
             position: relative;
             z-index: 2; /* Ensure it's above potential background elements */
         }
@@ -80,7 +82,7 @@
         /* Right section (visual/branding) */
         .right-section {
             flex: 0 0 60%; /* Occupy 60% width */
-            background: linear-gradient(135deg, #4F46E5 0%, #6366F1 50%, #9333EA 100%); /* Blue to Indigo to Purple */
+            background: linear-gradient(135deg, var(--accent) 0%, #6366F1 50%, var(--accent-dark) 100%); /* Blue to Indigo to Purple */
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -477,6 +479,7 @@
     </style>
 </head>
 <body class="bg-gray-100">
+    {% include "includes/theme_toggle_button.html" %}
     <div class="login-container">
         <div class="login-card">
             <div class="left-section">
@@ -652,6 +655,7 @@
         
     </script>
 
-    
+    {% include "includes/ai_chat.html" %}
+
 </body>
 </html>
