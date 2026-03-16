@@ -1,26 +1,50 @@
 # EdTrack3
 
-## AI Face Recognition Attendance (New)
+This repository is now organized as a **3-tier architecture**:
 
-This project now supports AI-based face verification for attendance.
+- **Presentation tier (frontend)**: React application running on `localhost:3000`
+- **Application tier (backend)**: Django REST API running on `localhost:5000`
+- **Data tier**: Django models + SQLite (or optional Postgres) stored in `backend/db.sqlite3`
 
-### Install dependencies
+---
+
+## Running the project (development)
+
+### 1) Start the backend (API server)
 
 ```bash
-pip install opencv-python
-pip install face_recognition
-pip install git+https://github.com/ageitgey/face_recognition_models
+cd backend
+python -m venv .venv   # optional: create a virtualenv
+.\.venv\Scripts\activate
+pip install -r requirements.txt
+python manage.py migrate
+python manage.py runserver 5000
 ```
 
-> On Windows, you may need Visual Studio Build Tools if `dlib` fails to install.
+The backend will run on `http://localhost:5000` and expose REST endpoints under `/api/`.
 
-### How to use
+### 2) Start the frontend (React app)
 
-1. Log in as a student.
-2. On the Student Dashboard, open the Attendance camera modal.
-3. Click **Enroll Face (AI)** once to register your face.
-4. Then click **Mark Attendance**. The system verifies your face before marking attendance.
+```bash
+cd frontend
+npm install
+npm start
+```
 
-### Notes
-- Attendance will be rejected if **no face** or **multiple faces** are detected.
-- Attendance will be rejected if the captured face does not match the enrolled face.
+The frontend will run on `http://localhost:3000` and will proxy API calls to the backend.
+
+---
+
+## Notes
+
+- API calls are handled by `frontend/src/services/api.js` and use a consistent JSON response format.
+- Backend CORS is configured to accept requests from `http://localhost:3000`.
+- Environment variables can be set via `backend/.env` (see `backend/.env.example`).
+
+---
+
+## Existing Features
+
+The existing AI face recognition attendance flow is still supported via the backend API.
+
+> If you want to run the legacy Django HTML templates instead of the React frontend, you can still visit the Django routes directly (e.g., `http://localhost:5000/login/`).

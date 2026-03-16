@@ -1,0 +1,12 @@
+{
+  "name": "edtrack-backend",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "python manage.py runserver 5000",
+    "migrate": "python manage.py migrate",
+    "makemigrations": "python manage.py makemigrations",
+    "createsuperuser": "python manage.py createsuperuser",
+    "test": "python manage.py test"
+  }
+}

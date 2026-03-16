@@ -1,0 +1,7 @@
+Django>=5.2
+opencv-python
+face_recognition
+numpy
+python-dotenv
+django-cors-headers
+djangorestframework
