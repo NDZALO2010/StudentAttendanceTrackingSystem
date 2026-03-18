@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import User, Student, Lecturer, Course, Enrollment, ClassSession, Attendance
+from .models import User, Student, Lecturer, Module, Program, Course, Enrollment, ClassSession, Attendance
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -8,28 +8,44 @@ class UserSerializer(serializers.ModelSerializer):
         fields = ['id', 'username', 'first_name', 'last_name', 'email', 'user_type']
 
 
+class ModuleSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Module
+        fields = ['module_code', 'module_name']
+
+
+class ProgramSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Program
+        fields = ['program_code', 'program_name']
+
+
 class StudentSerializer(serializers.ModelSerializer):
     user = UserSerializer()
+    modules = ModuleSerializer(many=True, read_only=True)
+    programs = ProgramSerializer(many=True, read_only=True)
 
     class Meta:
         model = Student
-        fields = ['user', 'program', 'parent_email', 'parent_phone_num']
+        fields = ['user', 'program', 'programs', 'modules', 'parent_email', 'parent_phone_num']
 
 
 class LecturerSerializer(serializers.ModelSerializer):
     user = UserSerializer()
+    modules = ModuleSerializer(many=True, read_only=True)
+    programs = ProgramSerializer(many=True, read_only=True)
 
     class Meta:
         model = Lecturer
-        fields = ['user', 'department']
+        fields = ['user', 'department', 'programs', 'modules']
 
 
 class CourseSerializer(serializers.ModelSerializer):
-    lecturer = LecturerSerializer(read_only=True)
+    modules = ModuleSerializer(many=True, read_only=True)
 
     class Meta:
         model = Course
-        fields = ['course_code', 'course_name', 'lecturer']
+        fields = ['course_code', 'course_name', 'modules']
 
 
 class ClassSessionSerializer(serializers.ModelSerializer):
@@ -59,7 +75,8 @@ class AttendanceSerializer(serializers.ModelSerializer):
 
 class EnrollmentSerializer(serializers.ModelSerializer):
     course = CourseSerializer(read_only=True)
+    modules = ModuleSerializer(many=True, read_only=True)
 
     class Meta:
         model = Enrollment
-        fields = ['id', 'course', 'enrollment_date']
+        fields = ['id', 'course', 'modules', 'enrollment_date']

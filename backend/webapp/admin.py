@@ -4,8 +4,11 @@ from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from django.db import IntegrityError  
 from django.contrib import messages
+from django.http import JsonResponse
+from django.urls import path
 
-from .models import User, Student, Lecturer, Course, Enrollment, ClassSession, Attendance
+from .models import User, Student, Lecturer, Module, Program, Course, Enrollment, ClassSession, Attendance
+from .forms import CourseForm, EnrollmentForm, ModuleForm
 
 class StudentInline(admin.StackedInline):
     model = Student
@@ -115,11 +118,76 @@ class CustomUserAdmin(BaseUserAdmin):
  
 admin.site.register(User, CustomUserAdmin)
 
- 
-admin.site.register(Student)
-admin.site.register(Lecturer)
-admin.site.register(Course)
-admin.site.register(Enrollment)
+
+class ModuleAdmin(admin.ModelAdmin):
+    form = ModuleForm
+    list_display = ('module_code', 'module_name')
+    search_fields = ('module_code', 'module_name')
+
+
+class CourseAdmin(admin.ModelAdmin):
+    form = CourseForm
+    list_display = ('course_code', 'course_name', 'module_list')
+    search_fields = ('course_code', 'course_name')
+
+    def module_list(self, obj):
+        return ", ".join([m.module_code for m in obj.modules.all()])
+    module_list.short_description = 'Modules'
+
+
+class EnrollmentAdmin(admin.ModelAdmin):
+    form = EnrollmentForm
+    list_display = ('student', 'course', 'module_list', 'enrollment_date')
+    list_filter = ('modules', 'enrollment_date')
+    search_fields = ('student__user__username', 'course__course_code', 'modules__module_code')
+    filter_horizontal = ('modules',)
+
+    def module_list(self, obj):
+        return ", ".join([m.module_code for m in obj.modules.all()])
+    module_list.short_description = 'Modules'
+
+    def get_urls(self):
+        urls = super().get_urls()
+        custom_urls = [
+            path(
+                'modules-for-course/',
+                self.admin_site.admin_view(self.modules_for_course),
+                name='webapp_enrollment_modules_for_course',
+            ),
+        ]
+        return custom_urls + urls
+
+    def modules_for_course(self, request):
+        course_id = request.GET.get('course_id')
+        data = {'modules': []}
+        if course_id:
+            try:
+                course = Course.objects.get(pk=course_id)
+                data['modules'] = [
+                    {'id': m.pk, 'code': m.module_code, 'name': m.module_name}
+                    for m in course.modules.all()
+                ]
+            except Course.DoesNotExist:
+                pass
+        return JsonResponse(data)
+
+
+class LecturerAdmin(admin.ModelAdmin):
+    list_display = ('user', 'department')
+    filter_horizontal = ('modules', 'programs')
+
+
+class StudentAdmin(admin.ModelAdmin):
+    list_display = ('user', 'program')
+    filter_horizontal = ('modules', 'programs')
+
+
+admin.site.register(Module, ModuleAdmin)
+admin.site.register(Program)
+admin.site.register(Student, StudentAdmin)
+admin.site.register(Lecturer, LecturerAdmin)
+admin.site.register(Course, CourseAdmin)
+admin.site.register(Enrollment, EnrollmentAdmin)
 admin.site.register(ClassSession)
 admin.site.register(Attendance)
 

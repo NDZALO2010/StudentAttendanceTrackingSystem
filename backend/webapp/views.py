@@ -154,15 +154,22 @@ def student_dashboard(request):
     if not FaceEncoding.objects.filter(student=student_profile).exists():
         return redirect('student_face_setup')
 
-    enrolled_courses_qs = Enrollment.objects.filter(student=student_profile).select_related('course__lecturer__user')
+    enrolled_courses_qs = Enrollment.objects.filter(student=student_profile).select_related('course')
 
     subjects_data = []
     for enrollment in enrolled_courses_qs:
+        course = enrollment.course
+        lecturer_names = set()
+        for mod in course.modules.all():
+            for lec in mod.lecturers.all():
+                lecturer_names.add(lec.user.get_full_name())
+        lecturer_name = ", ".join(sorted(lecturer_names)) if lecturer_names else 'N/A'
+
         subjects_data.append({
-            'id': enrollment.course.course_code,
-            'course_code': enrollment.course.course_code,
-            'course_name': enrollment.course.course_name,
-            'lecturer_name': enrollment.course.lecturer.user.get_full_name() if enrollment.course.lecturer else 'N/A'
+            'id': course.course_code,
+            'course_code': course.course_code,
+            'course_name': course.course_name,
+            'lecturer_name': lecturer_name,
         })
 
     attendance_records_qs = Attendance.objects.filter(
@@ -203,18 +210,18 @@ def student_dashboard(request):
             'lecturer_name': session.lecturer.user.get_full_name() if session.lecturer else 'N/A',
         })
 
-    enrollments = student_profile.enrollments.select_related('course__lecturer__user')
+    enrollments = student_profile.enrollments.select_related('course')
     lecturer_info = []
     for enrollment in enrollments:
         course = enrollment.course
-        lecturer = course.lecturer
-        if lecturer:
-            lecturer_info.append({
-                'course_code': course.course_code,
-                'course_name': course.course_name,
-                'lecturer_name': f"{lecturer.user.first_name} {lecturer.user.last_name}",
-                'lecturer_email': lecturer.user.email,
-            })
+        for module in course.modules.all():
+            for lecturer in module.lecturers.all():
+                lecturer_info.append({
+                    'course_code': course.course_code,
+                    'course_name': course.course_name,
+                    'lecturer_name': f"{lecturer.user.first_name} {lecturer.user.last_name}",
+                    'lecturer_email': lecturer.user.email,
+                })
 
     context = {
         'student': {
@@ -336,8 +343,8 @@ def lecturer_dashboard(request):
     # --- End Upcoming Session Calculation ---
 
     # --- Fetch unique courses taught by the lecturer  
-    # This query directly gets the Course objects associated with the lecturer.
-    courses_taught_qs = Course.objects.filter(lecturer=lecturer_profile).order_by('course_code')
+    # Courses are considered "taught" if they contain modules assigned to this lecturer.
+    courses_taught_qs = Course.objects.filter(modules__in=lecturer_profile.modules.all()).distinct().order_by('course_code')
 
     courses_for_dashboard_cards = []  
     for course in courses_taught_qs:
@@ -410,8 +417,12 @@ def view_course_sessions(request, course_code):
     """
     lecturer_profile = request.user.lecturer_profile
     
-    # Securely get the Course object. It must exist AND be taught by the current lecturer.
-    course = get_object_or_404(Course, course_code=course_code, lecturer=lecturer_profile)
+    # Securely get the Course object. It must exist AND be taught by the current lecturer (via module assignments).
+    course = get_object_or_404(
+        Course,
+        course_code=course_code,
+        modules__in=lecturer_profile.modules.all()
+    )
 
     # Fetch all class sessions for this specific course and lecturer.
     # Order them by day of the week and then by start time for a logical display.
@@ -490,8 +501,8 @@ def send_announcement(request):
 
     lecturer_profile = request.user.lecturer_profile
     
-    # Get all courses taught by the current lecturer
-    lecturer_courses = Course.objects.filter(lecturer=lecturer_profile).order_by('course_name')
+    # Get all courses taught by the current lecturer (via module assignments)
+    lecturer_courses = Course.objects.filter(modules__in=lecturer_profile.modules.all()).distinct().order_by('course_name')
     
     
     course_choices = [('', 'All My Modules')] + \
@@ -1068,17 +1079,17 @@ def download_timetable(request):
 def contact_lecturers(request):
     student = request.user.student_profile  # Get the Student profile for the logged-in user
     # Get all enrollments for this student
-    enrollments = student.enrollments.select_related('course__lecturer__user')
+    enrollments = student.enrollments.select_related('course')
     # Build a list of lecturer info for each enrolled course
     lecturer_info = []
     for enrollment in enrollments:
         course = enrollment.course
-        lecturer = course.lecturer
-        if lecturer:
-            lecturer_info.append({
-                'course_code': course.course_code,
-                'course_name': course.course_name,
-                'lecturer_name': f"{lecturer.user.first_name} {lecturer.user.last_name}",
-                'lecturer_email': lecturer.user.email,
-            })
+        for module in course.modules.all():
+            for lecturer in module.lecturers.all():
+                lecturer_info.append({
+                    'course_code': course.course_code,
+                    'course_name': course.course_name,
+                    'lecturer_name': f"{lecturer.user.first_name} {lecturer.user.last_name}",
+                    'lecturer_email': lecturer.user.email,
+                })
     return render(request, 'students/contact_lecturers.html', {'lecturer_info': lecturer_info})

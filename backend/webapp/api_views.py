@@ -86,15 +86,19 @@ def api_student_dashboard(request):
     student_data = StudentSerializer(student_profile).data
 
     # Enrolled subjects
-    enrolled_courses = Enrollment.objects.filter(student=student_profile).select_related('course__lecturer__user')
-    subjects_data = [
-        {
-            'course_code': e.course.course_code,
-            'course_name': e.course.course_name,
-            'lecturer_name': e.course.lecturer.user.get_full_name() if e.course.lecturer else None,
-        }
-        for e in enrolled_courses
-    ]
+    enrolled_courses = Enrollment.objects.filter(student=student_profile).select_related('course')
+    subjects_data = []
+    for e in enrolled_courses:
+        course = e.course
+        lecturer_names = set()
+        for module in course.modules.all():
+            for lecturer in module.lecturers.all():
+                lecturer_names.add(lecturer.user.get_full_name())
+        subjects_data.append({
+            'course_code': course.course_code,
+            'course_name': course.course_name,
+            'lecturer_name': ", ".join(sorted(lecturer_names)) if lecturer_names else None,
+        })
 
     # Attendance records
     attendance = Attendance.objects.filter(student=student_profile).select_related('session__course')[:20]
@@ -143,8 +147,8 @@ def api_lecturer_dashboard(request):
 
     lecturer_profile = request.user.lecturer_profile
 
-    # Courses taught
-    courses = lecturer_profile.courses_taught.select_related('lecturer__user')
+    # Courses taught (determined by modules assigned to this lecturer)
+    courses = Course.objects.filter(modules__in=lecturer_profile.modules.all()).distinct()
     course_data = [
         {
             'course_code': c.course_code,

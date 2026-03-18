@@ -37,7 +37,19 @@ class Student(models.Model):
         limit_choices_to={'user_type': 'Student'}
     )
     
-    program = models.CharField(max_length=100, blank=True, null=True) # <-- ADD blank=True, null=True
+    program = models.CharField(max_length=100, blank=True, null=True, verbose_name='Course') # <-- ADD blank=True, null=True
+    programs = models.ManyToManyField(
+        'Program',
+        blank=True,
+        related_name='students',
+        help_text='Programs that this student is enrolled in.'
+    )
+    modules = models.ManyToManyField(
+        'Module',
+        blank=True,
+        related_name='students',
+        help_text='Modules that this student is enrolled in.'
+    )
     parent_email = models.EmailField(blank=True, null=True, help_text="Parent's email address.")
     parent_phone_num = models.CharField(max_length=20, blank=True, null=True, help_text="Parent's phone number.")
 
@@ -72,6 +84,18 @@ class Lecturer(models.Model):
     )
     # Adding a department field to the Lecturer model
     department = models.CharField(max_length=100, blank=True, null=True) # <-- ADD blank=True, null=True
+    modules = models.ManyToManyField(
+        'Module',
+        blank=True,
+        related_name='lecturers',
+        help_text='Modules that this lecturer is assigned to.'
+    )
+    programs = models.ManyToManyField(
+        'Program',
+        blank=True,
+        related_name='lecturers',
+        help_text='Programs that this lecturer is associated with.'
+    )
 
     def __str__(self):
         return f"Lecturer: {self.user.first_name} {self.user.last_name} ({self.department or 'No Department'})" # Added 'or No Department'
@@ -92,24 +116,54 @@ class Lecturer(models.Model):
         verbose_name = _('lecturer')
         verbose_name_plural = _('lecturers')
  
-# --- 4. Course Model ---
+# --- 4. Module Model ---
+class Module(models.Model):
+    """Represents a teaching module or subject area."""
+    module_code = models.CharField(max_length=20, primary_key=True, help_text="Unique code for the module.")
+    module_name = models.CharField(max_length=255, help_text="Human-readable name for the module.")
+    description = models.TextField(blank=True, null=True, help_text="Optional description or notes about the module.")
+
+    class Meta:
+        verbose_name = _('module')
+        verbose_name_plural = _('modules')
+        ordering = ['module_code']
+
+    def __str__(self):
+        return f"{self.module_code} - {self.module_name}"
+
+
+# --- 5. Program Model ---
+class Program(models.Model):
+    """Represents an academic program (e.g., Bachelor of Science)."""
+    program_code = models.CharField(max_length=20, primary_key=True, help_text="Unique code for the program.")
+    program_name = models.CharField(max_length=255, help_text="Human-readable name for the program.")
+    description = models.TextField(blank=True, null=True, help_text="Optional description or notes about the program.")
+
+    class Meta:
+        verbose_name = _('program')
+        verbose_name_plural = _('programs')
+        ordering = ['program_code']
+
+    def __str__(self):
+        return f"{self.program_code} - {self.program_name}"
+
+
+# --- 6. Course Model ---
 class Course(models.Model):
-    """
-    Represents an academic course.
-    """
+    """Represents an academic course."""
     course_code = models.CharField(max_length=20, primary_key=True, help_text="Unique code for the course.")
     course_name = models.CharField(max_length=255)
-    lecturer = models.ForeignKey(
-        Lecturer,
-        on_delete=models.SET_NULL,
-        null=True,
+    modules = models.ManyToManyField(
+        Module,
         blank=True,
-        related_name='courses_taught',
-        help_text="The primary lecturer responsible for this course."
+        related_name='courses',
+        help_text="Modules associated with this course (e.g., Year 1, Year 2, etc.)."
     )
 
     def __str__(self):
-        return f"{self.course_code} - {self.course_name}"
+        module_codes = ", ".join([m.module_code for m in self.modules.all()]) if self.modules.exists() else ""
+        module_part = f" ({module_codes})" if module_codes else ""
+        return f"{self.course_code} - {self.course_name}{module_part}"
 
     class Meta:
         verbose_name = _('course')
@@ -119,10 +173,13 @@ class Course(models.Model):
 
 # --- 5. Enrollment Model (Many-to-Many through table with extra data) ---
 class Enrollment(models.Model):
-    """
-    Records a student's enrollment in a specific course.
+    """Records a student's enrollment in a specific course.
+
     This acts as a junction table between Student and Course with additional attributes.
+
+    Students may be enrolled in multiple modules for the same course.
     """
+
     student = models.ForeignKey(
         Student,
         on_delete=models.CASCADE,
@@ -135,6 +192,12 @@ class Enrollment(models.Model):
         related_name='enrollments',
         help_text="The course being enrolled in."
     )
+    modules = models.ManyToManyField(
+        Module,
+        blank=True,
+        related_name='enrollments',
+        help_text="The module(s) the student is enrolled in for this course."
+    )
     enrollment_date = models.DateField(auto_now_add=True, help_text="Date of enrollment.")
 
     class Meta:
@@ -144,7 +207,9 @@ class Enrollment(models.Model):
         ordering = ['-enrollment_date']
 
     def __str__(self):
-        return f"{self.student.user.get_full_name()} enrolled in {self.course.course_name}"
+        module_codes = ", ".join([m.module_code for m in self.modules.all()]) if self.modules.exists() else ""
+        module_part = f" ({module_codes})" if module_codes else ""
+        return f"{self.student.user.get_full_name()} enrolled in {self.course.course_name}{module_part}"
 
 
 # --- 6. ClassSession Model ---
@@ -157,6 +222,14 @@ class ClassSession(models.Model):
         on_delete=models.CASCADE,
         related_name='class_sessions',
         help_text="The course this session belongs to."
+    )
+    module = models.ForeignKey(
+        'Module',
+        on_delete=models.CASCADE,
+        related_name='class_sessions',
+        null=True,
+        blank=True,
+        help_text="The specific module covered in this session."
     )
     lecturer = models.ForeignKey(
         Lecturer,
@@ -245,3 +318,46 @@ class FaceEncoding(models.Model):
 
     def __str__(self):
         return f"FaceEncoding for {self.student.user.get_full_name()}"
+
+
+# --- Signals ---
+from django.db.models.signals import m2m_changed
+from django.dispatch import receiver
+
+
+@receiver(m2m_changed, sender=Student.modules.through)
+def sync_student_enrollments_with_modules(sender, instance, action, reverse, model, pk_set, **kwargs):
+    """Keep Enrollment records in sync with the student's selected Modules.
+
+    When an admin selects modules for a student, automatically create or remove
+    Enrollment records for courses that belong to those modules.
+
+    This ensures the "Enrollments" tab reflects the current module selections.
+    """
+    if action not in ('post_add', 'post_remove', 'post_clear'):
+        return
+
+    student_modules = set(instance.modules.all())
+
+    # Courses that belong to any of the student's selected modules
+    desired_courses = Course.objects.filter(modules__in=student_modules).distinct()
+
+    # Update existing enrollments
+    for enrollment in Enrollment.objects.filter(student=instance).select_related('course'):
+        shared_modules = list(enrollment.course.modules.filter(pk__in=[m.pk for m in student_modules]))
+        if shared_modules:
+            enrollment.modules.set(shared_modules)
+        else:
+            # Student no longer wants any module for this course
+            enrollment.delete()
+
+    # Create enrollments for courses that do not yet exist
+    existing_course_codes = set(
+        Enrollment.objects.filter(student=instance).values_list('course__course_code', flat=True)
+    )
+    for course in desired_courses:
+        if course.course_code not in existing_course_codes:
+            modules_to_assign = list(course.modules.filter(pk__in=[m.pk for m in student_modules]))
+            enrollment = Enrollment.objects.create(student=instance, course=course)
+            if modules_to_assign:
+                enrollment.modules.set(modules_to_assign)

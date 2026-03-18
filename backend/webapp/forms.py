@@ -1,8 +1,10 @@
 # academics/forms.py
 
 from django import forms
+from django.contrib import admin
+from django.contrib.admin.widgets import FilteredSelectMultiple
 from django.contrib.auth.forms import UserCreationForm, UserChangeForm
-from .models import User, Student, Lecturer, Course, Enrollment, ClassSession, Attendance
+from .models import User, Student, Lecturer, Course, Enrollment, ClassSession, Attendance, Module
 
 
 
@@ -80,7 +82,7 @@ class StudentForm(forms.ModelForm):
         exclude = ('user',)
        
         labels = {
-            'program': 'Academic Program',
+            'program': 'Course',
             'parent_email': 'Parent/Guardian Email',
             'parent_phone_num': 'Parent/Guardian Phone Number',
         }
@@ -93,14 +95,13 @@ class StudentForm(forms.ModelForm):
 
 # --- 3. Lecturer Form ---
 class LecturerForm(forms.ModelForm):
-    """
-    Form for creating and updating Lecturer profiles.
-    Similar to StudentForm, the 'user' field is typically excluded.
-    """
+    """Form for creating and updating Lecturer profiles.
+    Similar to StudentForm, the 'user' field is typically excluded."""
+
     class Meta:
         model = Lecturer
         exclude = ('user',)
-   
+
         labels = {
             'department': 'Department',
         }
@@ -109,46 +110,114 @@ class LecturerForm(forms.ModelForm):
         }
 
 
+class ModuleForm(forms.ModelForm):
+    """Form for creating/updating modules with the ability to assign lecturers."""
+
+    lecturers = forms.ModelMultipleChoiceField(
+        queryset=Lecturer.objects.all(),
+        required=False,
+        widget=FilteredSelectMultiple('Lecturers', is_stacked=False),
+        help_text='Select one or more lecturers who teach this module.',
+    )
+
+    class Meta:
+        model = Module
+        fields = '__all__'
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if self.instance and self.instance.pk:
+            self.fields['lecturers'].initial = self.instance.lecturers.all()
+
+    def save(self, commit=True):
+        module = super().save(commit=commit)
+        if commit:
+            module.lecturers.set(self.cleaned_data.get('lecturers'))
+        else:
+            def save_m2m():
+                module.lecturers.set(self.cleaned_data.get('lecturers'))
+            self.save_m2m = save_m2m
+        return module
+
+
 # --- 4. Course Form ---
 class CourseForm(forms.ModelForm):
-    """
-    Form for creating and updating Courses.
-    """
+    """Form for creating and updating Courses."""
+
     class Meta:
         model = Course
-        fields = '__all__'  
+        fields = '__all__'
         labels = {
             'course_code': 'Course Code',
             'course_name': 'Course Name',
-            'lecturer': 'Assigned Lecturer',
+            'modules': 'Modules',
         }
         widgets = {
             'course_code': forms.TextInput(attrs={'placeholder': 'e.g., CSC101'}),
             'course_name': forms.TextInput(attrs={'placeholder': 'e.g., Introduction to Programming'}),
         }
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Force module selection in the admin form
+        self.fields['modules'].required = True
+
+    def clean(self):
+        cleaned_data = super().clean()
+        modules = cleaned_data.get('modules')
+        if not modules or len(modules) == 0:
+            raise forms.ValidationError("Please select at least one module for this course.")
+        return cleaned_data
+
 
 # --- 5. Enrollment Form ---
 class EnrollmentForm(forms.ModelForm):
-    """
-    Form for managing student enrollments in courses.
-    """
+    """Form for managing student enrollments in courses."""
+
     class Meta:
         model = Enrollment
-        fields = '__all__'  
+        fields = '__all__'
         labels = {
             'student': 'Student',
             'course': 'Course',
+            'modules': 'Modules',
             'enrollment_date': 'Enrollment Date',
         }
         widgets = {
-            'enrollment_date': forms.DateInput(attrs={'type': 'date'}), # HTML5 date picker
+            'enrollment_date': forms.DateInput(attrs={'type': 'date'}),  # HTML5 date picker
         }
+
+    class Media:
+        js = ('webapp/js/enrollment_modules.js',)
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-      
-        pass
+        # Make modules required and use admin-friendly multi-select widget
+        self.fields['modules'].required = True
+        self.fields['modules'].widget = FilteredSelectMultiple('Modules', is_stacked=False)
+
+    def clean(self):
+        cleaned_data = super().clean()
+        course = cleaned_data.get('course')
+        modules = cleaned_data.get('modules')
+
+        if course and modules:
+            invalid_modules = [m for m in modules if m not in course.modules.all()]
+            if invalid_modules:
+                raise forms.ValidationError(
+                    "Selected module(s) must belong to the selected course."
+                )
+        elif course and (not modules or len(modules) == 0):
+            # Try auto-select if only one module belongs to the course
+            course_modules = list(course.modules.all())
+            if len(course_modules) == 1:
+                cleaned_data['modules'] = course_modules
+            else:
+                raise forms.ValidationError(
+                    "Please select at least one module for this enrollment."
+                )
+
+        return cleaned_data
 
 
 # --- 6. ClassSession Form ---
@@ -178,7 +247,36 @@ class ClassSessionForm(forms.ModelForm):
 
  
         if self.lecturer_profile:
-             self.fields['course'].queryset = Course.objects.filter(lecturer=self.lecturer_profile)
+            # Courses are now associated via Modules, and Lecturers are assigned to Modules.
+            # Show only courses that include at least one module taught by this lecturer.
+            lecturer_modules = self.lecturer_profile.modules.all()
+            self.fields['course'].queryset = Course.objects.filter(
+                modules__in=lecturer_modules
+            ).distinct()
+
+            # Show only the lecturer's modules in the module dropdown.
+            if 'module' in self.fields:
+                self.fields['module'].queryset = lecturer_modules
+
+    def clean(self):
+        cleaned_data = super().clean()
+        course = cleaned_data.get('course')
+        module = cleaned_data.get('module')
+
+        if course and module:
+            # Ensure the module is part of the selected course
+            if module not in course.modules.all():
+                raise forms.ValidationError("Selected module does not belong to the selected course.")
+
+            # Ensure module is assigned to the lecturer
+            if self.lecturer_profile and module not in self.lecturer_profile.modules.all():
+                raise forms.ValidationError("You can only schedule sessions for modules assigned to you.")
+
+        # Require module selection if course is selected
+        if course and not module:
+            raise forms.ValidationError("Please select a module for this class session.")
+
+        return cleaned_data
 
 # --- 7. Attendance Form ---
 class AttendanceForm(forms.ModelForm):
