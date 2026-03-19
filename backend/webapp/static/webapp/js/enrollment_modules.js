@@ -9,9 +9,9 @@
       return;
     }
 
-    // Determine the base admin URL for Enrollment
-    const match = window.location.pathname.match(/^(.*\/admin\/webapp\/enrollment\/)\/?.*$/);
-    const base = match ? match[1] : '/admin/webapp/enrollment/';
+    // Determine the base admin URL for Enrollment (plural path) so we can call the helper endpoint.
+    const match = window.location.pathname.match(/^(.*\/admin\/webapp\/enrollments\/)/);
+    const base = match ? match[1] : '/admin/webapp/enrollments/';
     const url = `${base}modules-for-course/?course_id=${encodeURIComponent(courseId)}`;
 
     fetch(url)

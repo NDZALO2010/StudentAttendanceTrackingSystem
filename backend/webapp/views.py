@@ -4,9 +4,9 @@ from django.core.mail import EmailMultiAlternatives
 from django.template.loader import render_to_string
 from django.utils.html import strip_tags
 from django.contrib import messages # For displaying feedback messages
+from django.urls import reverse
+from django.utils.safestring import mark_safe
 
- 
- 
 from django.db.models import Prefetch, Count, Q
 from django.http import JsonResponse
 import base64
@@ -16,7 +16,6 @@ import cv2
 from django.utils import timezone
 from django.core.files.base import ContentFile
 from django.contrib.auth import authenticate, login, logout
-from django.contrib import messages
 
 
 from .models import User, Student, Lecturer, Course, Enrollment, ClassSession, Attendance, FaceEncoding
@@ -59,7 +58,13 @@ def is_lecturer(user):
     return user.is_authenticated and hasattr(user, 'lecturer_profile') and user.user_type == 'Lecturer'
 
 def is_admin(user):
-    return user.is_authenticated and user.is_staff and user.user_type == 'Admin'
+    return (
+        user.is_authenticated
+        and (
+            user.is_superuser
+            or (user.is_staff and user.user_type == 'Admin')
+        )
+    )
 
 
 # --- Basic Authentication Views ---
@@ -67,53 +72,54 @@ def is_admin(user):
 
 
  
-def is_student(user):
-    return user.is_authenticated and hasattr(user, 'student_profile') and user.user_type == 'Student'
-
-def is_lecturer(user):
-    return user.is_authenticated and hasattr(user, 'lecturer_profile') and user.user_type == 'Lecturer'
-
-def is_admin(user):
-    return user.is_authenticated and user.is_staff and user.user_type == 'Admin'
-
-
-# --- Basic Authentication Views ---
-
 def custom_login_view(request):
     """
-    Handles user login. Authenticates based on username (student/staff number) and password.
     Redirects to the appropriate dashboard based on user_type.
     The role selection from the form has been removed for a cleaner UI.
     """
     if request.method == 'POST':
         user_number = request.POST.get('user_number')
         password = request.POST.get('password')
-        
 
         user = authenticate(request, username=user_number, password=password)
 
         if user is not None:
- 
+            # If this is the default admin account logging in for the first time, show a one-time security warning.
+            show_default_admin_notice = (
+                user.user_type == 'Admin'
+                and user.username == 'admin'
+                and user.check_password('Admin123!')
+                and user.last_login is None
+            )
 
-            login(request, user) # Log the user in
+            login(request, user)  # Log the user in
+
+            if show_default_admin_notice:
+                admin_users_url = reverse('admin_user_list')
+                messages.warning(
+                    request,
+                    mark_safe(
+                        f"Default admin credentials are <strong>admin/Admin123!</strong>. "
+                        f"<a href='{admin_users_url}'>Change the password</a> immediately in production."
+                    ),
+                )
 
             # Redirect based on user_type fetched directly from the authenticated user
             if user.user_type == 'Student':
                 messages.success(request, f"Welcome, {user.first_name}! You're logged in as a Student.")
-                return redirect('student_dashboard')  
+                return redirect('student_dashboard')
             elif user.user_type == 'Lecturer':
                 messages.success(request, f"Welcome, {user.first_name}! You're logged in as a Lecturer.")
-                return redirect('lecturer_dashboard')  
+                return redirect('lecturer_dashboard')
             elif user.user_type == 'Admin':
-                 return redirect('admin:index') # Redirect to Django admin site
+                return redirect('admin_dashboard')
             else:
-                 return redirect('home') # Fallback for other user types
+                return redirect('home')  # Fallback for other user types
 
         else:
             # Authentication failed
             messages.error(request, "You could not be authenticated, please check your username/password then try again")
-             
-            return render(request, 'login.html') 
+            return render(request, 'login.html')
     else:
         # For GET requests, just render the empty login form
         return render(request, 'login.html')

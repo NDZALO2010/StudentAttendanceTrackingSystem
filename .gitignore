@@ -6,8 +6,10 @@ __pycache__/
 # Virtual environments
 venv/
 venv_*/
+.venv/
 .env
 .env.*
+!.env.example
 
 # Django
 *.log
