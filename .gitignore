@@ -24,6 +24,7 @@ staticfiles/
 # IDEs
 .vscode/
 .idea/
+.vs/
 
 # OS files
 .DS_Store

@@ -1,2 +1,0 @@
-﻿{# Theme toggle button (insert it somewhere near the top of the body) #}
-<button id="theme-toggle" class="theme-toggle" aria-label="Toggle theme">🌙 Theme</button>
