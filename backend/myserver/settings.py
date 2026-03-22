@@ -17,6 +17,8 @@ import os
 from dotenv import load_dotenv
 load_dotenv(os.path.join(Path(__file__).resolve().parent.parent, '.env'))
 
+import dj_database_url
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -82,8 +84,12 @@ WSGI_APPLICATION = 'myserver.wsgi.application'
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
 # Database configuration
-# Uses environment variables for flexibility. By default, falls back to SQLite for local development.
-if os.getenv('DJANGO_DB_ENGINE'):
+# Uses DATABASE_URL if provided (e.g., for Neon), otherwise environment variables, or defaults to SQLite.
+if os.getenv('DATABASE_URL'):
+    DATABASES = {
+        'default': dj_database_url.config(default=os.getenv('DATABASE_URL'))
+    }
+elif os.getenv('DJANGO_DB_ENGINE'):
     DATABASES = {
         'default': {
             'ENGINE': os.getenv('DJANGO_DB_ENGINE'),
