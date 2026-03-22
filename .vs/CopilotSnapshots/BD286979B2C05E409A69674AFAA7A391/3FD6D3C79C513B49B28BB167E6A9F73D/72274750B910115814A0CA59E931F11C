@@ -1,0 +1,152 @@
+﻿{# Theme variables + JS for light/dark mode toggle #}
+<style>
+    /* Light theme (default) */
+    :root {
+        --bg: #ffffff;
+        --text: #0b1220;
+        --header-bg: #f8fafc;
+        --card-bg: #ffffff;
+        --footer-bg: #f8fafc;
+        --btn-bg: #3182ce;
+        --btn-bg-hover: #2a69ac;
+        --btn-bg-active: #254e77;
+        --btn-text: #ffffff;
+        --muted: #475569;
+        --shadow: rgba(2,6,23,0.08);
+        /* Branding / accents */
+        --brand: #2563eb; /* blue-600 */
+        --brand-dark: #1e40af; /* indigo-800 */
+        --accent: #bfdbfe; /* blue-200 */
+        --accent-mid: #93c5fd; /* blue-300 */
+        --accent-dark: #60a5fa; /* blue-400 */
+        --panel-bg: #f1f8ff; /* very light blue panel */
+        --input-border: #cbd5e1;
+        --input-bg: #f8fafc;
+        --input-bg-focus: #ffffff;
+    }
+
+    /* Dark theme overrides */
+    .dark-theme {
+        --bg: #0b1220;
+        --text: #ffffff;
+        --header-bg: #0f172a;
+        --card-bg: #1e293b;
+        --footer-bg: #0f172a;
+        --btn-bg: #2563eb;
+        --btn-bg-hover: #1d4ed8;
+        --btn-bg-active: #1e40af;
+        --btn-text: #f1f5f9;
+        --muted: #cbd5e1;
+        --shadow: rgba(0, 0, 0, 0.5);
+        --brand: #60a5fa;
+        --brand-dark: #2563eb;
+        --accent: #1e293b;
+        --accent-mid: #111827;
+        --accent-dark: #0b1220;
+        --panel-bg: #0b1220;
+        --input-border: rgba(255,255,255,0.08);
+        --input-bg: #0b1220;
+        --input-bg-focus: #0d1530;
+    }
+
+    .theme-toggle {
+        position: fixed;
+        top: 24px;
+        right: 24px;
+        z-index: 10000;
+        background: rgba(255, 255, 255, 0.9);
+        color: var(--text);
+        border: 1px solid rgba(0, 0, 0, 0.12);
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.18);
+        font-weight: 600;
+        padding: 0.5rem 0.9rem;
+        border-radius: 999px;
+        cursor: pointer;
+        transition: background 0.2s ease, transform 0.2s ease;
+        backdrop-filter: blur(6px);
+    }
+    .theme-toggle:hover {
+        background: rgba(255, 255, 255, 1);
+        transform: translateY(-1px);
+    }
+    .theme-toggle:active {
+        transform: translateY(0);
+    }
+
+    /* When used inside the admin top-right area, show inline and inherit layout */
+    .admin-top-right .theme-toggle {
+        position: static;
+        top: auto;
+        right: auto;
+        margin-left: 0.5rem;
+        background: transparent;
+        border: 1px solid rgba(255,255,255,0.06);
+        box-shadow: none;
+        padding: 0.45rem 0.7rem;
+    }
+    .admin-top-right .theme-toggle:hover {
+        background: rgba(255,255,255,0.06);
+        transform: none;
+    }
+
+    /* Make admin area readable in light mode (override Bootstrap classes) */
+    :root .sidebar {
+        background-color: #f1f5f9;
+        color: #0b1220;
+    }
+    :root .admin-top-right .btn,
+    :root .admin-top-right a.btn {
+        color: #0b1220;
+        background: rgba(255,255,255,0.9);
+        border-color: rgba(2,6,23,0.06);
+    }
+
+    /* In dark theme, keep the dark admin overrides as before */
+    .dark-theme .sidebar {
+        background-color: var(--sidebar-bg);
+        color: var(--sidebar-text);
+    }
+    .dark-theme .admin-top-right .btn,
+    .dark-theme .admin-top-right a.btn {
+        color: #fff;
+    }
+</style>
+<script>
+    (function () {
+        const toggleId = 'theme-toggle';
+        const storageKey = 'edtrackTheme';
+
+        function setTheme(theme) {
+            document.documentElement.classList.toggle('dark-theme', theme === 'dark');
+            const toggle = document.getElementById(toggleId);
+            if (toggle) {
+                toggle.textContent = theme === 'dark' ? '☀️' : '🌙';
+            }
+            localStorage.setItem(storageKey, theme);
+        }
+
+        function initTheme() {
+            const stored = localStorage.getItem(storageKey);
+            if (stored) {
+                setTheme(stored);
+            } else {
+                const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+                setTheme(prefersDark ? 'dark' : 'light');
+            }
+        }
+
+        function setupToggle() {
+            const toggle = document.getElementById(toggleId);
+            if (!toggle) return;
+            toggle.addEventListener('click', () => {
+                const isDark = document.documentElement.classList.contains('dark-theme');
+                setTheme(isDark ? 'light' : 'dark');
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            initTheme();
+            setupToggle();
+        });
+    })();
+</script>
