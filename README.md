@@ -33,9 +33,19 @@ npm start
 
 The frontend will run on `http://localhost:3000` and will proxy API calls to the backend.
 
----
+## Deployment
 
-## Notes
+### Frontend (Vercel)
+
+1. Deploy the `frontend/` directory to Vercel.
+2. Set the environment variable `REACT_APP_API_BASE` to your backend URL (e.g., `https://your-backend.herokuapp.com`).
+3. The `vercel.json` handles client-side routing.
+
+### Backend (Heroku/Railway/etc.)
+
+1. Deploy the `backend/` directory to a Python hosting service like Heroku or Railway.
+2. Update CORS settings in `backend/myserver/settings.py` to allow your Vercel domain.
+3. Ensure the database is configured for production (use Postgres instead of SQLite if needed).
 
 - API calls are handled by `frontend/src/services/api.js` and use a consistent JSON response format.
 - Backend CORS is configured to accept requests from `http://localhost:3000`.
