@@ -9,15 +9,16 @@
     {% include "includes/theme_variables.html" %}
     <style>
         :root {
-            --sidebar-bg: #34495e;
-            --sidebar-text: #ecf0f1;
+            /* Light-mode admin defaults (shades of blue) */
+            --sidebar-bg: #eaf4ff; /* very light blue */
+            --sidebar-text: #0b1220; /* dark text for readability */
             --card-bg: #ffffff;
-            --card-border: rgba(0,0,0,0.1);
-            --link-active: #e74c3c;
-            --btn-danger: #e74c3c;
-            --btn-success: #27ae60;
-            --btn-warning: #f39c12;
-            --shadow: rgba(0,0,0,0.1);
+            --card-border: rgba(2,6,23,0.06);
+            --link-active: #2563eb; /* blue-600 */
+            --btn-danger: #ef4444;
+            --btn-success: #10b981;
+            --btn-warning: #f59e0b;
+            --shadow: rgba(2,6,23,0.06);
         }
         .dark-theme {
             --sidebar-bg: #0f172a;
@@ -31,7 +32,8 @@
             --shadow: rgba(0,0,0,0.5);
         }
         body {
-            background-color: var(--bg) !important;
+            /* Use a blue gradient background on admin pages; variables change under .dark-theme */
+            background: linear-gradient(135deg, var(--page-admin-start), var(--page-admin-end)) !important;
             color: var(--text) !important;
         }
 
@@ -142,16 +144,19 @@
 </head>
 <body>
 
+
 <div class="admin-top-right">
     <a class="btn btn-outline-light" href="{% url 'login' %}" target="_blank">View Site</a>
     <form action="{% url 'logout' %}" method="post" class="m-0">
         {% csrf_token %}
         <button class="btn btn-logout" type="submit">LOGOUT</button>
     </form>
+    {% comment %} Theme toggle placed after logout button to align with request {% endcomment %}
+    <button id="theme-toggle" class="theme-toggle" aria-label="Toggle theme">🌙</button>
 </div>
 
 <div class="sidebar">
-    <h3 class="text-white mb-4">EduTrack Admin</h3>
+    <h3 class="mb-4">EduTrack Admin</h3>
     <nav class="nav flex-column">
         <a class="nav-link{% if request.resolver_match.url_name == 'admin_dashboard' %} active{% endif %}" href="{% url 'admin_dashboard' %}">Dashboard</a>
         <a class="nav-link{% if request.resolver_match.url_name == 'admin_user_list' %} active{% endif %}" href="{% url 'admin_user_list' %}">Users</a>

@@ -24,8 +24,8 @@
         .sidebar {
             width: 250px;
             min-height: 100vh;
-            background-color:#3498db;
-            color: #e2e8f0; /* Lighter text for contrast */
+            background: linear-gradient(180deg, var(--sidebar-lecturer-start), var(--sidebar-lecturer-end));
+            color: var(--sidebar-text); /* Lighter text for contrast */
             position: fixed;
             top: 0;
             left: 0;
@@ -44,18 +44,18 @@
         .user-info {
             text-align: center;
             padding-bottom: 20px;
-            border-bottom: 1px solid #2d3748; /* Darker border for separation */
+            border-bottom: 1px solid rgba(2,6,23,0.06); /* Border for separation, adapts to theme */
             margin-bottom: 24px;
         }
         .user-id {
             font-size: 0.875rem; /* text-sm */
-            color: #a0aec0; /* Tailwind gray-400 */
+            color: var(--sidebar-text);
         }
         .user-name {
             font-size: 1.35rem; /* Slightly larger */
             font-weight: 700; /* Bold */
             margin-top: 8px;
-            color: #ffffff;
+            color: var(--sidebar-text);
         }
         .nav-menu {
             list-style: none;
@@ -70,7 +70,7 @@
             display: flex;
             align-items: center;
             padding: 15px 18px;  
-            color: #ffffff; 
+            color: var(--sidebar-text);
             text-decoration: none;
             border-radius: 0.625rem; /* Slightly more rounded */
             transition: all 0.3s ease;
@@ -81,18 +81,22 @@
             width: 1.25rem; /* Slightly larger icons */
             height: 1.25rem;
             stroke-width: 2;
+            color: var(--sidebar-text); /* use theme variable for consistent contrast */
+            opacity: 0.9;
         }
         .nav-link:hover {
-            background-color: #2980b9;  
-            color: #ffffff;
+            background-color: rgba(37,99,235,0.14);
+            color: var(--sidebar-text);
             transform: translateX(5px);  
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Subtle shadow on hover */
+            box-shadow: 0 6px 14px rgba(2,6,23,0.08); /* Subtle shadow on hover */
         }
         .nav-link.active {
-            background-color: #2980b9;  
-            color: #ffffff;
-            box-shadow: 0 4px 10px rgba(76, 81, 191, 0.4); /* Stronger, colored shadow for active */
+            background-color: rgba(37,99,235,0.18);
+            color: var(--sidebar-text);
+            box-shadow: 0 6px 16px rgba(37,99,235,0.14); /* Stronger, colored shadow for active */
             font-weight: 600; /* Semibold for active */
+            border-left: 5px solid var(--brand);
+            padding-left: 13px; /* compensate for border */
         }
         .logout-button-container {
             margin-top: auto;

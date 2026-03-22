@@ -44,8 +44,8 @@
 .sidebar {
     width: 260px;
     min-height: 100vh;
-    background: linear-gradient(180deg, #065a96, #0766a5); /* Gradient effect */
-    color: #e3f2fd;
+    background: linear-gradient(180deg, var(--sidebar-student-start), var(--sidebar-student-end)); /* Gradient effect */
+    color: var(--sidebar-text);
     position: fixed;
     top: 0;
     left: 0;
@@ -96,7 +96,7 @@
     display: flex;
     align-items: center;
     padding: 1rem 1.2rem;
-    color: #ffffff;
+    color: var(--sidebar-text);
     text-decoration: none;
     border-radius: 8px;
     transition: all 0.3s ease-in-out;
@@ -112,7 +112,7 @@
 }
 
 .nav-link:hover {
-    background: rgba(255, 255, 255, 0.15);
+    background: rgba(255, 255, 255, 0.12);
     transform: translateX(6px);
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
 }

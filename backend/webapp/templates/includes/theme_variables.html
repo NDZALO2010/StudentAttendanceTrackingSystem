@@ -1,18 +1,36 @@
 {# Theme variables + JS for light/dark mode toggle #}
 <style>
+    /* Light theme (default) */
     :root {
-        --bg: #000029;
-        --text: #ffffff;
-        --header-bg: #000029;
-        --card-bg: #0d0d2a;
-        --footer-bg: #000029;
+        --bg: #ffffff;
+        --text: #0b1220;
+        --header-bg: #f8fafc;
+        --card-bg: #ffffff;
+        --footer-bg: #f8fafc;
         --btn-bg: #3182ce;
         --btn-bg-hover: #2a69ac;
         --btn-bg-active: #254e77;
         --btn-text: #ffffff;
-        --muted: #cbd5e1;
-        --shadow: rgba(0, 0, 0, 0.85);
+        --muted: #475569;
+        --shadow: rgba(2,6,23,0.08);
+        /* Branding / accents */
+        --brand: #2563eb; /* blue-600 */
+        --brand-dark: #1e40af; /* indigo-800 */
+        --accent: #bfdbfe; /* blue-200 */
+        --accent-mid: #93c5fd; /* blue-300 */
+        --accent-dark: #60a5fa; /* blue-400 */
+        --panel-bg: #f1f8ff; /* very light blue panel */
+        --input-border: #cbd5e1;
+        --input-bg: #f8fafc;
+        --input-bg-focus: #ffffff;
+        /* Page background gradient stops for login and admin pages */
+        --page-login-start: #e0f2fe; /* blue-100 */
+        --page-login-end: #93c5fd; /* blue-300 */
+        --page-admin-start: #eff6ff; /* blue-50 */
+        --page-admin-end: #dbeafe; /* blue-100 */
     }
+
+    /* Dark theme overrides */
     .dark-theme {
         --bg: #0b1220;
         --text: #ffffff;
@@ -25,6 +43,37 @@
         --btn-text: #f1f5f9;
         --muted: #cbd5e1;
         --shadow: rgba(0, 0, 0, 0.5);
+        --brand: #60a5fa;
+        --brand-dark: #2563eb;
+        --accent: #1e293b;
+        --accent-mid: #111827;
+        --accent-dark: #0b1220;
+        --panel-bg: #0b1220;
+        --input-border: rgba(255,255,255,0.08);
+        --input-bg: #0b1220;
+        --input-bg-focus: #0d1530;
+        /* Dark fallbacks for page backgrounds */
+        --page-login-start: #071032;
+        --page-login-end: #091427;
+        --page-admin-start: #07132a;
+        --page-admin-end: #0b1530;
+    }
+
+    /* Sidebar gradient variables for lecturer and student pages */
+    :root {
+        --sidebar-lecturer-start: #e6f2ff; /* light blue */
+        --sidebar-lecturer-end: #cfe9ff;
+        --sidebar-student-start: #e6f7ff;
+        --sidebar-student-end: #cfeeff;
+        --sidebar-text: #0b1220;
+    }
+
+    .dark-theme {
+        --sidebar-lecturer-start: #0b2440;
+        --sidebar-lecturer-end: #072033;
+        --sidebar-student-start: #0a2238;
+        --sidebar-student-end: #041526;
+        --sidebar-text: #e6eef8;
     }
 
     .theme-toggle {
@@ -49,6 +98,44 @@
     }
     .theme-toggle:active {
         transform: translateY(0);
+    }
+
+    /* When used inside the admin top-right area, show inline and inherit layout */
+    .admin-top-right .theme-toggle {
+        position: static;
+        top: auto;
+        right: auto;
+        margin-left: 0.5rem;
+        background: transparent;
+        border: 1px solid rgba(255,255,255,0.06);
+        box-shadow: none;
+        padding: 0.45rem 0.7rem;
+    }
+    .admin-top-right .theme-toggle:hover {
+        background: rgba(255,255,255,0.06);
+        transform: none;
+    }
+
+    /* Make admin area readable in light mode (override Bootstrap classes) */
+    :root .sidebar {
+        background-color: #f1f5f9;
+        color: #0b1220;
+    }
+    :root .admin-top-right .btn,
+    :root .admin-top-right a.btn {
+        color: #0b1220;
+        background: rgba(255,255,255,0.9);
+        border-color: rgba(2,6,23,0.06);
+    }
+
+    /* In dark theme, keep the dark admin overrides as before */
+    .dark-theme .sidebar {
+        background-color: var(--sidebar-bg);
+        color: var(--sidebar-text);
+    }
+    .dark-theme .admin-top-right .btn,
+    .dark-theme .admin-top-right a.btn {
+        color: #fff;
     }
 </style>
 <script>
