@@ -33,6 +33,8 @@ SECRET_KEY = os.getenv('DJANGO_SECRET_KEY', 'django-insecure-duqoi6mg5@fypw3@hy9
 DEBUG = os.getenv('DJANGO_DEBUG', 'True').lower() in ('1', 'true', 'yes')
 
 ALLOWED_HOSTS = os.getenv('DJANGO_ALLOWED_HOSTS', 'localhost 127.0.0.1').replace(',', ' ').split()
+ALLOWED_HOSTS = ['.up.railway.app', 'localhost']
+
 
 
 # Application definition
