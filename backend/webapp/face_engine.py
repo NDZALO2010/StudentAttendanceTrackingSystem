@@ -9,7 +9,7 @@ import numpy as np
 # - face_locations: face detection
 # - face_encodings: embedding extraction (128-D vector)
 # - face_distance: similarity metric between embeddings
-import face_recognition
+# NOTE: Lazy import inside functions to avoid libX11 dependency errors in headless environments
 
 
 @dataclass
@@ -20,6 +20,8 @@ class EncodeResult:
 
 def encode_single_face(rgb_image: np.ndarray) -> EncodeResult:
     """Detect exactly one face and return its encoding."""
+    import face_recognition
+    
     locations = face_recognition.face_locations(rgb_image, model="hog")
     if len(locations) == 0:
         return EncodeResult("NO_FACE", None)
@@ -52,6 +54,8 @@ def match_face(
     known_student_ids: List[int],
     threshold: float = 0.55,
 ) -> MatchResult:
+    import face_recognition
+    
     if not known_encodings:
         return MatchResult(None, None, None, "NO_KNOWN_FACES")
 
