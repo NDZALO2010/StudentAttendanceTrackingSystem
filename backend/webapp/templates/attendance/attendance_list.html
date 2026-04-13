@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Attendance List</title>
+    {% include "includes/theme_variables.html" %}
+    <style>
+        body {
+            background: var(--bg);
+            color: var(--text);
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+            margin: 1rem;
+        }
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            margin-top: 1rem;
+        }
+        th, td {
+            border: 1px solid rgba(0,0,0,0.12);
+            padding: 0.5rem 0.75rem;
+            text-align: left;
+        }
+        th {
+            background: rgba(0,0,0,0.05);
+        }
+        a {
+            color: var(--accent);
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body>
+    {% include "includes/theme_toggle_button.html" %}
+    <h1>Attendance Records</h1>
+    <a href="{% url 'attendance_create' %}">Add Attendance</a>
+    <table border="1">
+        <tr>
+            <th>Student Number</th>
+            <th>Subject Code</th>
+            <th>Date & Time</th>
+            <th>Status</th>
+            <th>Actions</th>
+        </tr>
+        {% for attendance in attendance_list %}
+        <tr>
+            <td>{{ attendance.studentNumber }}</td>
+            <td>{{ attendance.subjectCode }}</td>
+            <td>{{ attendance.dateAndTime }}</td>
+            <td>{{ attendance.status }}</td>
+            <td>
+                <a href="{% url 'attendance_update' attendance.attendID %}">Edit</a> |
+                <a href="{% url 'attendance_delete' attendance.attendID %}">Delete</a>
+            </td>
+        </tr>
+        {% endfor %}
+    </table>
+    <a href="{% url 'home' %}">Back to home</a> 
+</body>
+</html>

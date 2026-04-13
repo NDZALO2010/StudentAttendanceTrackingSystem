@@ -1,0 +1,53 @@
+{% extends 'admin/base.html' %}
+
+{% block content %}
+<h1 class="mb-4">{% if is_update %}Edit Lecturer{% else %}Add Lecturer{% endif %}</h1>
+
+<form method="post">
+    {% csrf_token %}
+
+    {% if user_form.errors or lecturer_form.errors %}
+        <div class="alert alert-danger">
+            <strong>There were problems with your submission:</strong>
+            <ul class="mb-0">
+                {% for field in user_form %}
+                    {% for error in field.errors %}
+                        <li><strong>{{ field.label }}:</strong> {{ error }}</li>
+                    {% endfor %}
+                {% endfor %}
+                {% for error in user_form.non_field_errors %}
+                    <li>{{ error }}</li>
+                {% endfor %}
+                {% for field in lecturer_form %}
+                    {% for error in field.errors %}
+                        <li><strong>{{ field.label }}:</strong> {{ error }}</li>
+                    {% endfor %}
+                {% endfor %}
+                {% for error in lecturer_form.non_field_errors %}
+                    <li>{{ error }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+    {% endif %}
+
+    <div class="row">
+        <div class="col-md-6">
+            <div class="card p-4 mb-3">
+                <h5>User Account</h5>
+                {{ user_form.as_p }}
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card p-4 mb-3">
+                <h5>Lecturer Profile</h5>
+                {{ lecturer_form.as_p }}
+            </div>
+        </div>
+    </div>
+
+    <div class="form-actions">
+        <button type="submit" class="btn btn-success">Save</button>
+        <a href="{% url 'admin_lecturer_list' %}" class="btn btn-secondary">Cancel</a>
+    </div>
+</form>
+{% endblock %}
