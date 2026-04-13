@@ -1,0 +1,97 @@
+{% extends 'admin/base.html' %}
+
+{% block content %}
+<h1 class="mb-4">Admin Dashboard</h1>
+
+<div class="alert alert-warning" role="alert">
+    <strong>Security notice:</strong> Default admin credentials are <code>admin</code> / <code>Admin123!</code>. Change the password immediately in production.
+</div>
+
+<div class="row g-3">
+    <div class="col-md-4">
+        <div class="card p-3">
+            <h5 class="card-title">Total Users</h5>
+            <p class="card-text display-6">{{ total_users }}</p>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card p-3">
+            <h5 class="card-title">Total Students</h5>
+            <p class="card-text display-6">{{ total_students }}</p>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card p-3">
+            <h5 class="card-title">Total Lecturers</h5>
+            <p class="card-text display-6">{{ total_lecturers }}</p>
+        </div>
+    </div>
+</div>
+
+<div class="row g-3 mt-3">
+    <div class="col-md-4">
+        <div class="card p-3">
+            <h5 class="card-title">Programs</h5>
+            <p class="card-text">{{ total_programs }}</p>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card p-3">
+            <h5 class="card-title">Courses</h5>
+            <p class="card-text">{{ total_courses }}</p>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card p-3">
+            <h5 class="card-title">Modules</h5>
+            <p class="card-text">{{ total_modules }}</p>
+        </div>
+    </div>
+</div>
+
+<div class="row g-3 mt-3">
+    <div class="col-md-4">
+        <div class="card p-3">
+            <h5 class="card-title">Enrollments</h5>
+            <p class="card-text">{{ total_enrollments }}</p>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card p-3">
+            <h5 class="card-title">Class Sessions</h5>
+            <p class="card-text">{{ total_sessions }}</p>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card p-3">
+            <h5 class="card-title">Attendance Records</h5>
+            <p class="card-text">{{ total_attendance }}</p>
+        </div>
+    </div>
+</div>
+
+<div class="row g-3 mt-3">
+    <div class="col-md-4">
+        <div class="card p-3">
+            <h5 class="card-title">Face Encodings</h5>
+            <p class="card-text">{{ total_face_encodings }}</p>
+        </div>
+    </div>
+</div>
+
+<div class="row g-3 mt-3">
+    <div class="col-md-4">
+        <div class="card p-3">
+            <h5 class="card-title">Groups</h5>
+            <p class="card-text">{{ total_groups }}</p>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card p-3">
+            <h5 class="card-title">Permissions</h5>
+            <p class="card-text">{{ total_permissions }}</p>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
