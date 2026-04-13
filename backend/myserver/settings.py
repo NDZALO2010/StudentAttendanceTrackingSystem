@@ -11,29 +11,17 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 
 from pathlib import Path
+from urllib.parse import urlparse
 import os
 
-# Load environment variables from a .env file if present
 from dotenv import load_dotenv
+
 load_dotenv(os.path.join(Path(__file__).resolve().parent.parent, '.env'))
 
-# Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
-
-
-# Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
-
-# SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = os.getenv('DJANGO_SECRET_KEY', 'django-insecure-duqoi6mg5@fypw3@hy9%0=50sao8t$eti&_mtqt^(o%tf1yq(^')
-
-# SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.getenv('DJANGO_DEBUG', 'True').lower() in ('1', 'true', 'yes')
-
 ALLOWED_HOSTS = os.getenv('DJANGO_ALLOWED_HOSTS', 'localhost 127.0.0.1').replace(',', ' ').split()
-
-
-# Application definition
 
 INSTALLED_APPS = [
     'corsheaders',
@@ -77,39 +65,30 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'myserver.wsgi.application'
 
-
-# Database
-# https://docs.djangoproject.com/en/5.2/ref/settings/#databases
-
-# Database configuration
-# Uses environment variables for flexibility. By default, falls back to SQLite for local development.
 database_url = os.getenv('DATABASE_URL')
-if os.getenv('DJANGO_DB_ENGINE'):
-    if database_url:
-        from urllib.parse import urlparse
-
-        parsed_url = urlparse(database_url)
-        DATABASES = {
-            'default': {
-                'ENGINE': 'django.db.backends.postgresql',
-                'NAME': parsed_url.path.lstrip('/'),
-                'USER': parsed_url.username,
-                'PASSWORD': parsed_url.password,
-                'HOST': parsed_url.hostname,
-                'PORT': parsed_url.port or '5432',
-            }
+if database_url:
+    parsed_url = urlparse(database_url)
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.postgresql',
+            'NAME': parsed_url.path.lstrip('/'),
+            'USER': parsed_url.username,
+            'PASSWORD': parsed_url.password,
+            'HOST': parsed_url.hostname,
+            'PORT': parsed_url.port or '5432',
         }
-    else:
-        DATABASES = {
-            'default': {
-                'ENGINE': 'django.db.backends.postgresql',
-                'NAME': os.getenv('POSTGRES_DB', 'edutrack_db_rbji'),
-                'USER': os.getenv('POSTGRES_USER', 'edutrack_db_rbji_user'),
-                'PASSWORD': os.getenv('POSTGRES_PASSWORD', ''),
-                'HOST': os.getenv('POSTGRES_HOST', 'dpg-d7eeihtckfvc73cig0r0-a.oregon-postgres.render.com'),
-                'PORT': os.getenv('POSTGRES_PORT', '5432'),
-            }
+    }
+elif os.getenv('DJANGO_DB_ENGINE'):
+    DATABASES = {
+        'default': {
+            'ENGINE': os.getenv('DJANGO_DB_ENGINE'),
+            'NAME': os.getenv('DJANGO_DB_NAME'),
+            'USER': os.getenv('DJANGO_DB_USER'),
+            'PASSWORD': os.getenv('DJANGO_DB_PASSWORD'),
+            'HOST': os.getenv('DJANGO_DB_HOST'),
+            'PORT': os.getenv('DJANGO_DB_PORT'),
         }
+    }
 else:
     DATABASES = {
         'default': {
@@ -118,20 +97,14 @@ else:
         }
     }
 
-# Allow the frontend to call APIs
 CORS_ALLOWED_ORIGINS = os.getenv('CORS_ALLOWED_ORIGINS', 'http://localhost:3000').split(',')
 CORS_ALLOW_CREDENTIALS = True
 CSRF_TRUSTED_ORIGINS = os.getenv('CSRF_TRUSTED_ORIGINS', 'http://localhost:3000').split(',')
 
-# Keep cookies accessible across origins during local development
 SESSION_COOKIE_SAMESITE = None
 CSRF_COOKIE_SAMESITE = None
 SESSION_COOKIE_SECURE = False
 CSRF_COOKIE_SECURE = False
-
-
-# Password validation
-# https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators
 
 AUTH_PASSWORD_VALIDATORS = [
     {
@@ -148,42 +121,23 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-
-# Internationalization
-# https://docs.djangoproject.com/en/5.2/topics/i18n/
-
 LANGUAGE_CODE = 'en-us'
-
 TIME_ZONE = 'Africa/Johannesburg'
-
 USE_I18N = True
-
 USE_TZ = True
-
-
-# Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/5.2/howto/static-files/
 
 STATIC_URL = 'static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'static/')
 
-# Default primary key field type
-# https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
-# settings.py
 AUTH_USER_MODEL = 'webapp.User'
-
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-# Email Configuration
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
-EMAIL_USE_TLS = True # Use TLS for security
-EMAIL_HOST_USER = 'nyikogiven74@gmail.com'  
-EMAIL_HOST_PASSWORD = 'rzcksgqksodfuqwl' # Use an App Password if 2FA is enabled
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = 'nyikogiven74@gmail.com'
+EMAIL_HOST_PASSWORD = 'rzcksgqksodfuqwl'
 
-# 
-
-# Media (uploaded images)
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
