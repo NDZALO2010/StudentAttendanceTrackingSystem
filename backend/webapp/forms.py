@@ -192,9 +192,23 @@ class EnrollmentForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        # Ensure student/course/modules are selectable in the admin form
+        # Provide friendly labels for student choices (username - full name)
+        self.fields['student'].queryset = Student.objects.select_related('user').order_by('user__username')
+        try:
+            # Provide a readable label for student choices
+            self.fields['student'].label_from_instance = lambda obj: f"{obj.user.username} - {obj.user.get_full_name()}"
+        except Exception:
+            pass
+
+        # Order courses for easier selection
+        self.fields['course'].queryset = Course.objects.all().order_by('course_code')
+
         # Make modules required and use admin-friendly multi-select widget
         self.fields['modules'].required = True
         self.fields['modules'].widget = FilteredSelectMultiple('Modules', is_stacked=False)
+        # Ensure modules queryset is available so JS can populate it correctly
+        self.fields['modules'].queryset = Module.objects.all().order_by('module_code')
 
     def clean(self):
         cleaned_data = super().clean()
