@@ -11,6 +11,14 @@ export default function LoginPage() {
   const navigate = useNavigate();
   const { setUser } = useAuth();
 
+  function getBackendBaseUrl() {
+    const raw = process.env.REACT_APP_API_BASE || '';
+    if (!raw) {
+      return '';
+    }
+    return raw.replace(/\/+$/, '');
+  }
+
   const handleSubmit = async (event) => {
     event.preventDefault();
     setError(null);
@@ -24,8 +32,13 @@ export default function LoginPage() {
       } else if (response.data?.user?.user_type === 'Lecturer') {
         navigate('/lecturer');
       } else {
-        // Admin users are redirected to the Django admin UI
-        window.location.href = 'http://localhost:5000/admin/';
+        // Admin users are redirected to the Django admin UI on the backend host.
+        const backendBase = getBackendBaseUrl();
+        if (!backendBase) {
+          setError('Admin login requires REACT_APP_API_BASE to be set in Netlify.');
+          return;
+        }
+        window.location.href = `${backendBase}/admin/`;
       }
     } catch (err) {
       setError(err.message || 'Unable to login.');
