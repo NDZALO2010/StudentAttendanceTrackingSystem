@@ -32,8 +32,16 @@ SECRET_KEY = os.getenv('DJANGO_SECRET_KEY', 'django-insecure-duqoi6mg5@fypw3@hy9
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.getenv('DJANGO_DEBUG', 'True').lower() in ('1', 'true', 'yes')
 
-ALLOWED_HOSTS = os.getenv('DJANGO_ALLOWED_HOSTS', 'localhost 127.0.0.1').replace(',', ' ').split()
-ALLOWED_HOSTS = ['.up.railway.app', 'localhost']
+raw_allowed_hosts = os.getenv('DJANGO_ALLOWED_HOSTS', '')
+ALLOWED_HOSTS = [host.strip() for host in raw_allowed_hosts.replace(' ', ',').split(',') if host.strip()]
+
+# Reasonable defaults for local dev and Railway deployments.
+if not ALLOWED_HOSTS:
+    ALLOWED_HOSTS = ['.up.railway.app', '.railway.internal', 'localhost', '127.0.0.1']
+else:
+    for default_host in ('.up.railway.app', '.railway.internal', 'localhost', '127.0.0.1'):
+        if default_host not in ALLOWED_HOSTS:
+            ALLOWED_HOSTS.append(default_host)
 
 
 
