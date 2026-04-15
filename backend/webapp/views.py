@@ -11,8 +11,6 @@ from django.db.models import Prefetch, Count, Q
 from django.http import JsonResponse
 import base64
 import json
-import numpy as np
-import cv2
 from django.utils import timezone
 from django.core.files.base import ContentFile
 from django.contrib.auth import authenticate, login, logout
@@ -771,6 +769,9 @@ def enroll_face_api(request):
         return JsonResponse({'error': 'Invalid request method.'}, status=405)
 
     try:
+        import numpy as np
+        import cv2
+
         data = json.loads(request.body.decode('utf-8'))
         image_data_b64 = data.get('image_data')
 
@@ -853,6 +854,9 @@ def mark_attendance_api(request):
         return JsonResponse({'error': 'Invalid request method.'}, status=405)
 
     try:
+        import numpy as np
+        import cv2
+
         data = json.loads(request.body.decode('utf-8'))
         session_id = data.get('session_id')
         image_data_b64 = data.get('image_data')
