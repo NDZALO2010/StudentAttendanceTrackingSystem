@@ -1,5 +1,6 @@
 from django.contrib.auth import authenticate, login, logout
 from django.views.decorators.csrf import csrf_exempt
+import traceback
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
@@ -46,19 +47,26 @@ def api_status(request):
 @csrf_exempt
 def api_login(request):
     """Authenticate a user and create a session cookie."""
-    username = request.data.get('username')
-    password = request.data.get('password')
+    try:
+        username = request.data.get('username')
+        password = request.data.get('password')
 
-    if not username or not password:
-        return api_error('Missing username or password.', status_code=status.HTTP_400_BAD_REQUEST)
+        if not username or not password:
+            return api_error('Missing username or password.', status_code=status.HTTP_400_BAD_REQUEST)
 
-    user = authenticate(request, username=username, password=password)
-    if user is None:
-        return api_error('Invalid username or password', status_code=status.HTTP_401_UNAUTHORIZED)
+        user = authenticate(request, username=username, password=password)
+        if user is None:
+            return api_error('Invalid username or password', status_code=status.HTTP_401_UNAUTHORIZED)
 
-    login(request, user)
-    user_data = UserSerializer(user).data
-    return api_success({'user': user_data}, message='Logged in successfully.')
+        login(request, user)
+        user_data = UserSerializer(user).data
+        return api_success({'user': user_data}, message='Logged in successfully.')
+    except Exception as exc:
+        traceback.print_exc()
+        return api_error(
+            f'Login failed due to a server error: {str(exc)}',
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        )
 
 
 @api_view(['POST'])
