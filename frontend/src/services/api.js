@@ -18,6 +18,17 @@ function normalizeApiBase(rawBase) {
 const API_BASE = normalizeApiBase(process.env.REACT_APP_API_BASE || '');
 let csrfToken = null;
 
+function getCookie(name) {
+  const cookies = document.cookie ? document.cookie.split(';') : [];
+  for (const rawCookie of cookies) {
+    const cookie = rawCookie.trim();
+    if (cookie.startsWith(`${name}=`)) {
+      return decodeURIComponent(cookie.slice(name.length + 1));
+    }
+  }
+  return null;
+}
+
 function buildUrl(path) {
   // If path already includes protocol, leave it alone.
   if (path.startsWith('http://') || path.startsWith('https://')) {
@@ -40,8 +51,9 @@ async function fetchJson(path, options = {}) {
   }
 
   // Cross-origin session auth requires explicitly sending the CSRF token header.
-  if ((method === 'POST' || method === 'PUT' || method === 'PATCH' || method === 'DELETE') && csrfToken && !headers['X-CSRFToken']) {
-    headers['X-CSRFToken'] = csrfToken;
+  const csrfHeaderValue = csrfToken || getCookie('csrftoken');
+  if ((method === 'POST' || method === 'PUT' || method === 'PATCH' || method === 'DELETE') && csrfHeaderValue && !headers['X-CSRFToken']) {
+    headers['X-CSRFToken'] = csrfHeaderValue;
   }
 
   const finalOptions = {
