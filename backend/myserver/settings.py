@@ -135,15 +135,38 @@ else:
     )
 
 # Allow the frontend to call APIs
-CORS_ALLOWED_ORIGINS = [origin.strip() for origin in os.getenv('CORS_ALLOWED_ORIGINS', 'http://localhost:3000').split(',')]
-CORS_ALLOW_CREDENTIALS = True
-CSRF_TRUSTED_ORIGINS = [origin.strip() for origin in os.getenv('CSRF_TRUSTED_ORIGINS', 'http://localhost:3000').split(',')]
+def _parse_origins(value: str):
+    origins = []
+    for raw_origin in value.split(','):
+        origin = raw_origin.strip().rstrip('/')
+        if origin:
+            origins.append(origin)
+    return origins
 
-# Keep cookies accessible across origins during local development
-SESSION_COOKIE_SAMESITE = None
-CSRF_COOKIE_SAMESITE = None
-SESSION_COOKIE_SECURE = not DEBUG
-CSRF_COOKIE_SECURE = not DEBUG
+
+DEFAULT_FRONTEND_ORIGINS = 'http://localhost:3000,https://studentattendancetrackingsystem.netlify.app'
+
+CORS_ALLOWED_ORIGINS = _parse_origins(
+    os.getenv('CORS_ALLOWED_ORIGINS', DEFAULT_FRONTEND_ORIGINS)
+)
+CORS_ALLOW_CREDENTIALS = True
+CSRF_TRUSTED_ORIGINS = _parse_origins(
+    os.getenv('CSRF_TRUSTED_ORIGINS', DEFAULT_FRONTEND_ORIGINS)
+)
+
+# Cookie policy:
+# - Local HTTP development: Lax + insecure (browser-compatible)
+# - Production cross-site (Netlify -> Railway): None + secure
+if DEBUG:
+    SESSION_COOKIE_SAMESITE = 'Lax'
+    CSRF_COOKIE_SAMESITE = 'Lax'
+    SESSION_COOKIE_SECURE = False
+    CSRF_COOKIE_SECURE = False
+else:
+    SESSION_COOKIE_SAMESITE = 'None'
+    CSRF_COOKIE_SAMESITE = 'None'
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
 
 
 # Password validation
