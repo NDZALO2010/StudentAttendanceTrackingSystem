@@ -1,5 +1,6 @@
 from django.contrib.auth import authenticate, login, logout
 from django.views.decorators.csrf import csrf_exempt
+from django.middleware.csrf import get_token
 import traceback
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny, IsAuthenticated
@@ -60,7 +61,8 @@ def api_login(request):
 
         login(request, user)
         user_data = UserSerializer(user).data
-        return api_success({'user': user_data}, message='Logged in successfully.')
+        csrf_token = get_token(request)
+        return api_success({'user': user_data, 'csrf_token': csrf_token}, message='Logged in successfully.')
     except Exception as exc:
         traceback.print_exc()
         return api_error(
@@ -79,9 +81,10 @@ def api_logout(request):
 @api_view(['GET'])
 @permission_classes([AllowAny])
 def api_current_user(request):
+    csrf_token = get_token(request)
     if not request.user.is_authenticated:
-        return api_success({'user': None})
-    return api_success({'user': UserSerializer(request.user).data})
+        return api_success({'user': None, 'csrf_token': csrf_token})
+    return api_success({'user': UserSerializer(request.user).data, 'csrf_token': csrf_token})
 
 
 @api_view(['GET'])
