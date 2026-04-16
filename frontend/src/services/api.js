@@ -11,10 +11,15 @@ function buildUrl(path) {
 async function fetchJson(path, options = {}) {
   const url = buildUrl(path);
 
+  const method = (options.method || 'GET').toUpperCase();
   const headers = {
-    'Content-Type': 'application/json',
     ...options.headers,
   };
+
+  // Only set JSON content type when sending a request body.
+  if ((method === 'POST' || method === 'PUT' || method === 'PATCH' || method === 'DELETE') && options.body && !headers['Content-Type']) {
+    headers['Content-Type'] = 'application/json';
+  }
 
   const finalOptions = {
     credentials: 'include',
