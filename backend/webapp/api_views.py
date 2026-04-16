@@ -77,8 +77,10 @@ def api_logout(request):
 
 
 @api_view(['GET'])
-@permission_classes([IsAuthenticated])
+@permission_classes([AllowAny])
 def api_current_user(request):
+    if not request.user.is_authenticated:
+        return api_success({'user': None})
     return api_success({'user': UserSerializer(request.user).data})
 
 
