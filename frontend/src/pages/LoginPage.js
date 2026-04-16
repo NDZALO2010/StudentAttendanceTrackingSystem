@@ -16,7 +16,14 @@ export default function LoginPage() {
     if (!raw) {
       return '';
     }
-    return raw.replace(/\/+$/, '');
+    let normalized = raw.trim();
+    if (!normalized) {
+      return '';
+    }
+    if (!/^https?:\/\//i.test(normalized)) {
+      normalized = `https://${normalized}`;
+    }
+    return normalized.replace(/\/+$/, '');
   }
 
   const handleSubmit = async (event) => {

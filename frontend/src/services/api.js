@@ -1,4 +1,21 @@
-const API_BASE = process.env.REACT_APP_API_BASE || '';
+function normalizeApiBase(rawBase) {
+  if (!rawBase) {
+    return '';
+  }
+
+  let normalized = rawBase.trim();
+  if (!normalized) {
+    return '';
+  }
+
+  if (!/^https?:\/\//i.test(normalized)) {
+    normalized = `https://${normalized}`;
+  }
+
+  return normalized.replace(/\/+$/, '');
+}
+
+const API_BASE = normalizeApiBase(process.env.REACT_APP_API_BASE || '');
 
 function buildUrl(path) {
   // If path already includes protocol, leave it alone.
@@ -29,7 +46,16 @@ async function fetchJson(path, options = {}) {
 
   const response = await fetch(url, finalOptions);
   const text = await response.text();
-  const data = text ? JSON.parse(text) : {};
+  const contentType = response.headers.get('content-type') || '';
+  const isJson = contentType.includes('application/json');
+  const data = text && isJson ? JSON.parse(text) : {};
+
+  if (!isJson && text) {
+    const error = new Error('Server returned non-JSON response. Check REACT_APP_API_BASE and backend CORS settings.');
+    error.status = response.status;
+    error.details = text.slice(0, 200);
+    throw error;
+  }
 
   if (!response.ok) {
     const errorMessage = data?.message || response.statusText || 'Unknown error';
