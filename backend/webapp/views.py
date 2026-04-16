@@ -28,6 +28,8 @@ from .forms import AnnouncementForm
  
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required, user_passes_test
+from django.views.decorators.cache import never_cache
+from django.views.decorators.csrf import ensure_csrf_cookie
 from django.db.models import Prefetch, Count, Q
 from django.http import JsonResponse
 import base64
@@ -70,6 +72,8 @@ def is_admin(user):
 
 
  
+@never_cache
+@ensure_csrf_cookie
 def custom_login_view(request):
     """
     Redirects to the appropriate dashboard based on user_type.
