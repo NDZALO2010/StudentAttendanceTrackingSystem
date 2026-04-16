@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 
 from pathlib import Path
 import os
+from urllib.parse import urlparse
 
 # Load environment variables from a .env file if present
 from dotenv import load_dotenv
@@ -117,6 +118,21 @@ else:
             'NAME': BASE_DIR / 'db.sqlite3',
         }
     }
+
+db_url = os.getenv('DATABASE_URL', '')
+if db_url:
+    parsed_db_url = urlparse(db_url)
+    print(
+        f"[startup] DB engine={DATABASES['default'].get('ENGINE')} "
+        f"host={parsed_db_url.hostname or ''} "
+        f"name={parsed_db_url.path.lstrip('/')}"
+    )
+else:
+    print(
+        f"[startup] DB engine={DATABASES['default'].get('ENGINE')} "
+        f"host={DATABASES['default'].get('HOST', '')} "
+        f"name={DATABASES['default'].get('NAME', '')}"
+    )
 
 # Allow the frontend to call APIs
 CORS_ALLOWED_ORIGINS = [origin.strip() for origin in os.getenv('CORS_ALLOWED_ORIGINS', 'http://localhost:3000').split(',')]
