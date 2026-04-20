@@ -81,7 +81,7 @@ async function fetchJson(path, options = {}) {
   }
 
   if (!response.ok) {
-    const errorMessage = data?.message || response.statusText || 'Unknown error';
+    const errorMessage = data?.message || data?.detail || response.statusText || 'Unknown error';
     const error = new Error(errorMessage);
     error.status = response.status;
     error.details = data;

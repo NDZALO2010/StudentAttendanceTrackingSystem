@@ -2,7 +2,7 @@ from django.contrib.auth import authenticate, login, logout
 from django.views.decorators.csrf import csrf_exempt
 from django.middleware.csrf import get_token
 import traceback
-from rest_framework.decorators import api_view, permission_classes
+from rest_framework.decorators import api_view, permission_classes, authentication_classes
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework import status
@@ -43,9 +43,10 @@ def api_status(request):
     return api_success({'status': 'ok'})
 
 
-@api_view(['POST'])
-@permission_classes([AllowAny])
 @csrf_exempt
+@api_view(['POST'])
+@authentication_classes([])
+@permission_classes([AllowAny])
 def api_login(request):
     """Authenticate a user and create a session cookie."""
     try:

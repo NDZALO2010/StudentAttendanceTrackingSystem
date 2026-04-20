@@ -13,17 +13,22 @@ export default function LoginPage() {
 
   function getBackendBaseUrl() {
     const raw = process.env.REACT_APP_API_BASE || '';
-    if (!raw) {
-      return '';
+    if (raw) {
+      let normalized = raw.trim();
+      if (normalized) {
+        if (!/^https?:\/\//i.test(normalized)) {
+          normalized = `https://${normalized}`;
+        }
+        return normalized.replace(/\/+$/, '');
+      }
     }
-    let normalized = raw.trim();
-    if (!normalized) {
-      return '';
+
+    // Local development fallback when frontend runs on :3000 and backend on :5000.
+    if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+      return `${window.location.protocol}//${window.location.hostname}:5000`;
     }
-    if (!/^https?:\/\//i.test(normalized)) {
-      normalized = `https://${normalized}`;
-    }
-    return normalized.replace(/\/+$/, '');
+
+    return '';
   }
 
   const handleSubmit = async (event) => {
@@ -42,7 +47,7 @@ export default function LoginPage() {
         // Admin users are redirected to the Django admin UI on the backend host.
         const backendBase = getBackendBaseUrl();
         if (!backendBase) {
-          setError('Admin login requires REACT_APP_API_BASE to be set in Netlify.');
+          setError('Admin login requires REACT_APP_API_BASE to be configured for this environment.');
           return;
         }
         window.location.href = `${backendBase}/admin/`;
