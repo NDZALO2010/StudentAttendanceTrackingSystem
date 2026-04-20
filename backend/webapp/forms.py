@@ -227,11 +227,12 @@ class ClassSessionForm(forms.ModelForm):
     """
     class Meta:
         model = ClassSession
-        exclude = ['lecturer']  
+        fields = '__all__'
         labels = {
             'day_of_week': 'Day of Week',
             'start_time': 'Start Time',
             'end_time': 'End Time',
+            'lecturer': 'Lecturer',
         }
         widgets = {
             'day_of_week': forms.Select(choices=ClassSession.day_of_week.field.choices),  
@@ -262,6 +263,10 @@ class ClassSessionForm(forms.ModelForm):
         cleaned_data = super().clean()
         course = cleaned_data.get('course')
         module = cleaned_data.get('module')
+        lecturer = cleaned_data.get('lecturer')
+
+        if not lecturer:
+            raise forms.ValidationError("Please select a lecturer for this class session.")
 
         if course and module:
             # Ensure the module is part of the selected course

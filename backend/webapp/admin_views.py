@@ -1,7 +1,7 @@
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.contrib.auth.forms import SetPasswordForm
 from django.contrib import messages
-from django.http import JsonResponse
+from django.http import JsonResponse, Http404
 from django.urls import reverse_lazy
 from django.shortcuts import redirect, get_object_or_404
 from django.views import View
@@ -169,6 +169,14 @@ class AdminModelFormView(AdminRequiredMixin):
 
 class AdminModelDeleteView(AdminRequiredMixin, DeleteView):
     template_name = 'admin/confirm_delete.html'
+
+    def dispatch(self, request, *args, **kwargs):
+        try:
+            return super().dispatch(request, *args, **kwargs)
+        except Http404:
+            model_name = self.model._meta.verbose_name.title()
+            messages.error(request, f"{model_name} not found or already deleted.")
+            return redirect(reverse_lazy(f'admin_{self.model._meta.model_name}_list'))
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
