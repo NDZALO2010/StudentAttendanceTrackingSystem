@@ -227,12 +227,11 @@ class ClassSessionForm(forms.ModelForm):
     """
     class Meta:
         model = ClassSession
-        fields = '__all__'
+        exclude = ('lecturer',)
         labels = {
             'day_of_week': 'Day of Week',
             'start_time': 'Start Time',
             'end_time': 'End Time',
-            'lecturer': 'Lecturer',
         }
         widgets = {
             'day_of_week': forms.Select(choices=ClassSession.day_of_week.field.choices),  
@@ -246,36 +245,21 @@ class ClassSessionForm(forms.ModelForm):
         self.lecturer_profile = kwargs.pop('lecturer_profile', None)
         super().__init__(*args, **kwargs)
 
- 
-        if self.lecturer_profile:
-            # Courses are now associated via Modules, and Lecturers are assigned to Modules.
-            # Show only courses that include at least one module taught by this lecturer.
-            lecturer_modules = self.lecturer_profile.modules.all()
-            self.fields['course'].queryset = Course.objects.filter(
-                modules__in=lecturer_modules
-            ).distinct()
-
-            # Show only the lecturer's modules in the module dropdown.
-            if 'module' in self.fields:
-                self.fields['module'].queryset = lecturer_modules
+        # Always show available database records in both dropdowns.
+        self.fields['course'].queryset = Course.objects.all().order_by('course_code')
+        if 'module' in self.fields:
+            self.fields['module'].queryset = Module.objects.all().order_by('module_code')
+            self.fields['module'].help_text = 'Select the course first, then choose one of the matching modules.'
 
     def clean(self):
         cleaned_data = super().clean()
         course = cleaned_data.get('course')
         module = cleaned_data.get('module')
-        lecturer = cleaned_data.get('lecturer')
-
-        if not lecturer:
-            raise forms.ValidationError("Please select a lecturer for this class session.")
 
         if course and module:
             # Ensure the module is part of the selected course
             if module not in course.modules.all():
                 raise forms.ValidationError("Selected module does not belong to the selected course.")
-
-            # Ensure module is assigned to the lecturer
-            if self.lecturer_profile and module not in self.lecturer_profile.modules.all():
-                raise forms.ValidationError("You can only schedule sessions for modules assigned to you.")
 
         # Require module selection if course is selected
         if course and not module:

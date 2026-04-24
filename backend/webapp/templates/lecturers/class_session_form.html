@@ -220,11 +220,6 @@
             {% endif %}
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4">
-                {# Render the hidden lecturer field first if it exists #}
-                {% if form.lecturer.is_hidden %}
-                    {{ form.lecturer }}
-                {% endif %}
-
                 <div class="form-group md:col-span-2">
                     {{ form.course.label_tag }}
                     {{ form.course }}
@@ -238,6 +233,9 @@
                 <div class="form-group md:col-span-2">
                     {{ form.module.label_tag }}
                     {{ form.module }}
+                    {% if form.module.help_text %}
+                        <p class="mt-2 text-sm text-gray-500">{{ form.module.help_text }}</p>
+                    {% endif %}
                     {% if form.module.errors %}
                         <ul class="errorlist">
                             {% for error in form.module.errors %}<li>{{ error }}</li>{% endfor %}
@@ -300,10 +298,75 @@
         </form>
     </div>
 
+    {{ modules_by_course_json|json_script:"modules-by-course-data" }}
     <script>
-        // Initialize Lucide icons on DOMContentLoaded
         document.addEventListener('DOMContentLoaded', function() {
             lucide.createIcons();
+
+            const courseSelect = document.getElementById('id_course');
+            const moduleSelect = document.getElementById('id_module');
+            const dataElement = document.getElementById('modules-by-course-data');
+
+            if (!courseSelect || !moduleSelect || !dataElement) {
+                return;
+            }
+
+            const modulesByCourse = JSON.parse(dataElement.textContent || '{}');
+            const originalModuleOptions = Array.from(moduleSelect.options).map((option) => ({
+                value: option.value,
+                text: option.textContent,
+                selected: option.selected,
+            }));
+
+            const renderOriginalModules = () => {
+                moduleSelect.innerHTML = '';
+                originalModuleOptions.forEach((optionData) => {
+                    const option = document.createElement('option');
+                    option.value = optionData.value;
+                    option.textContent = optionData.text;
+                    option.selected = optionData.selected;
+                    moduleSelect.appendChild(option);
+                });
+            };
+
+            const renderModulesForCourse = (courseCode, selectedModuleValue = '') => {
+                if (!courseCode) {
+                    renderOriginalModules();
+                    return;
+                }
+
+                const modules = modulesByCourse[courseCode] || [];
+                moduleSelect.innerHTML = '';
+
+                const placeholder = document.createElement('option');
+                placeholder.value = '';
+                placeholder.textContent = modules.length ? 'Select a module' : 'No modules available for this course';
+                moduleSelect.appendChild(placeholder);
+
+                modules.forEach((moduleData) => {
+                    const option = document.createElement('option');
+                    option.value = moduleData.id;
+                    option.textContent = `${moduleData.code} - ${moduleData.name}`;
+                    if (selectedModuleValue && String(moduleData.id) === String(selectedModuleValue)) {
+                        option.selected = true;
+                    }
+                    moduleSelect.appendChild(option);
+                });
+
+                if (selectedModuleValue) {
+                    moduleSelect.value = String(selectedModuleValue);
+                }
+            };
+
+            const initialModuleValue = moduleSelect.value;
+
+            courseSelect.addEventListener('change', function() {
+                renderModulesForCourse(courseSelect.value);
+            });
+
+            if (courseSelect.value) {
+                renderModulesForCourse(courseSelect.value, initialModuleValue);
+            }
         });
     </script>
 </body>

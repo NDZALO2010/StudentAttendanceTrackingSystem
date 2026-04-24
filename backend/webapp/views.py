@@ -67,6 +67,25 @@ def is_admin(user):
     )
 
 
+def _build_class_session_form_context():
+    all_courses = Course.objects.all().order_by('course_code')
+    modules_by_course = {
+        course.course_code: [
+            {
+                'id': module.pk,
+                'code': module.module_code,
+                'name': module.module_name,
+            }
+            for module in course.modules.all().order_by('module_code')
+        ]
+        for course in all_courses
+    }
+    return {
+        'courses': all_courses,
+        'modules_by_course_json': json.dumps(modules_by_course),
+    }
+
+
 # --- Basic Authentication Views ---
  
 
@@ -1000,7 +1019,9 @@ def add_class_session(request):
         form = ClassSessionForm(lecturer_profile=lecturer_profile)
 
     # Render the form template, passing the form instance
-    return render(request, 'lecturers/class_session_form.html', {'form': form})
+    context = {'form': form}
+    context.update(_build_class_session_form_context())
+    return render(request, 'lecturers/class_session_form.html', context)
 
 @login_required
 def edit_class_session(request, pk):
@@ -1033,7 +1054,9 @@ def edit_class_session(request, pk):
         form = ClassSessionForm(instance=class_session, lecturer_profile=lecturer_profile)
 
     # 
-    return render(request, 'lecturers/class_session_form.html', {'form': form, 'class_session': class_session})
+    context = {'form': form, 'class_session': class_session}
+    context.update(_build_class_session_form_context())
+    return render(request, 'lecturers/class_session_form.html', context)
 
 
 @login_required
