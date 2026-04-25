@@ -30,6 +30,7 @@ from .forms import (
     CourseForm,
     EnrollmentForm,
     ClassSessionForm,
+    AdminClassSessionForm,
     AttendanceForm,
 )
 
@@ -627,12 +628,12 @@ class AdminClassSessionListView(AdminModelListView):
 
 class AdminClassSessionCreateView(AdminModelFormView, CreateView):
     model = ClassSession
-    form_class = ClassSessionForm
+    form_class = AdminClassSessionForm
 
 
 class AdminClassSessionUpdateView(AdminModelFormView, UpdateView):
     model = ClassSession
-    form_class = ClassSessionForm
+    form_class = AdminClassSessionForm
 
 
 class AdminClassSessionDeleteView(AdminModelDeleteView):

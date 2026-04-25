@@ -267,6 +267,49 @@ class ClassSessionForm(forms.ModelForm):
 
         return cleaned_data
 
+
+class AdminClassSessionForm(forms.ModelForm):
+    """Admin form for creating/updating class sessions with explicit lecturer selection."""
+
+    class Meta:
+        model = ClassSession
+        fields = '__all__'
+        labels = {
+            'day_of_week': 'Day of Week',
+            'start_time': 'Start Time',
+            'end_time': 'End Time',
+            'lecturer': 'Lecturer',
+        }
+        widgets = {
+            'day_of_week': forms.Select(choices=ClassSession.day_of_week.field.choices),
+            'start_time': forms.TimeInput(attrs={'type': 'time'}),
+            'end_time': forms.TimeInput(attrs={'type': 'time'}),
+            'room': forms.TextInput(attrs={'placeholder': 'e.g., Room A101, Zoom Link'}),
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['course'].queryset = Course.objects.all().order_by('course_code')
+        self.fields['module'].queryset = Module.objects.all().order_by('module_code')
+        self.fields['lecturer'].queryset = Lecturer.objects.select_related('user').order_by('user__first_name', 'user__last_name', 'user__username')
+
+    def clean(self):
+        cleaned_data = super().clean()
+        course = cleaned_data.get('course')
+        module = cleaned_data.get('module')
+        lecturer = cleaned_data.get('lecturer')
+
+        if not lecturer:
+            raise forms.ValidationError("Please select a lecturer for this class session.")
+
+        if course and module and module not in course.modules.all():
+            raise forms.ValidationError("Selected module does not belong to the selected course.")
+
+        if course and not module:
+            raise forms.ValidationError("Please select a module for this class session.")
+
+        return cleaned_data
+
 # --- 7. Attendance Form ---
 class AttendanceForm(forms.ModelForm):
     """
