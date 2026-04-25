@@ -856,6 +856,18 @@ def enroll_face_api(request):
 
     except json.JSONDecodeError:
         return JsonResponse({'error': 'Invalid JSON payload.'}, status=400)
+    except OSError as e:
+        if 'libX11.so.6' in str(e) or 'cannot open shared object file' in str(e):
+            return JsonResponse(
+                {
+                    'error': (
+                        'Face recognition service is unavailable on the server: missing native dependency '
+                        '(libX11.so.6). Ask the administrator to install Linux runtime libraries and redeploy.'
+                    )
+                },
+                status=503,
+            )
+        return JsonResponse({'error': f'System dependency error: {str(e)}'}, status=503)
     except Exception as e:
         import traceback
         traceback.print_exc()
@@ -981,6 +993,18 @@ def mark_attendance_api(request):
         return JsonResponse({'error': 'Class session not found.'}, status=404)
     except json.JSONDecodeError:
         return JsonResponse({'error': 'Invalid JSON payload.'}, status=400)
+    except OSError as e:
+        if 'libX11.so.6' in str(e) or 'cannot open shared object file' in str(e):
+            return JsonResponse(
+                {
+                    'error': (
+                        'Face recognition service is unavailable on the server: missing native dependency '
+                        '(libX11.so.6). Ask the administrator to install Linux runtime libraries and redeploy.'
+                    )
+                },
+                status=503,
+            )
+        return JsonResponse({'error': f'System dependency error: {str(e)}'}, status=503)
     except Exception as e:
         import traceback
         traceback.print_exc()
