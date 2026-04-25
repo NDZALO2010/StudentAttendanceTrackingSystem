@@ -32,12 +32,12 @@ SECRET_KEY = os.environ['DJANGO_SECRET_KEY']
 ALLOWED_HOSTS = os.environ.get('DJANGO_ALLOWED_HOSTS', '').split(',')
 
 # Ensure cookies are only sent over HTTPS in production.
-# Cross-site frontend/backend deployments (e.g., Vercel -> Railway)
-# require SameSite=None for session + CSRF cookies.
+# For same-origin requests (form logins): use Lax (safer, works for form submission)
+# For cross-origin API requests: browser will send with SameSite=Lax if from allowed origin + credentials
 SESSION_COOKIE_SECURE = True
 CSRF_COOKIE_SECURE = True
-SESSION_COOKIE_SAMESITE = os.environ.get('DJANGO_SESSION_COOKIE_SAMESITE', 'None')
-CSRF_COOKIE_SAMESITE = os.environ.get('DJANGO_CSRF_COOKIE_SAMESITE', 'None')
+SESSION_COOKIE_SAMESITE = 'Lax'
+CSRF_COOKIE_SAMESITE = 'Lax'
 
 # Recommended security headers
 SECURE_BROWSER_XSS_FILTER = True
